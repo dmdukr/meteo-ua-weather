@@ -236,6 +236,40 @@ async def handle_uninstall(request: web.Request) -> web.Response:
     return web.json_response({"status": "ok", "message": "Integration and card removed"})
 
 
+def _notify_restart() -> None:
+    """Send persistent notification + request HA restart via Supervisor API."""
+    import urllib.request
+
+    supervisor_token = os.environ.get("SUPERVISOR_TOKEN", "")
+    if not supervisor_token:
+        _LOGGER.warning("No SUPERVISOR_TOKEN — cannot notify HA")
+        return
+
+    headers = {
+        "Authorization": f"Bearer {supervisor_token}",
+        "Content-Type": "application/json",
+    }
+
+    # Create persistent notification
+    try:
+        data = json.dumps({
+            "title": "Meteo UA Parser",
+            "message": "Інтеграцію Meteo UA Weather та карточку прогнозу встановлено. "
+                       "Перезавантажте Home Assistant для активації.\n\n"
+                       "Meteo UA Weather integration and forecast card installed. "
+                       "Restart Home Assistant to activate.",
+            "notification_id": "meteo_ua_restart_required",
+        }).encode()
+        req = urllib.request.Request(
+            "http://supervisor/core/api/services/persistent_notification/create",
+            data=data, headers=headers, method="POST",
+        )
+        urllib.request.urlopen(req, timeout=10)
+        _LOGGER.info("Restart notification sent to HA")
+    except Exception as exc:
+        _LOGGER.warning("Failed to send notification: %s", exc)
+
+
 def main() -> None:
     options = load_options()
     log_level = getattr(logging, options.get("log_level", "info").upper(), logging.INFO)
@@ -249,7 +283,8 @@ def main() -> None:
     _LOGGER.info("Checking integration and card installation...")
     needs_restart = install_all()
     if needs_restart:
-        _LOGGER.info("Integration/card installed or updated. HA restart may be needed.")
+        _LOGGER.info("Integration/card installed or updated — requesting HA restart")
+        _notify_restart()
 
     app = web.Application()
     app.router.add_get("/api/health", handle_health)
