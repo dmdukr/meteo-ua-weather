@@ -14,7 +14,7 @@ from .coordinator import MeteoUaCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS_LIST = [Platform.WEATHER, Platform.SENSOR]
+PLATFORMS_LIST = [Platform.WEATHER]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -52,8 +52,6 @@ async def _register_card(hass: HomeAssistant) -> None:
 
     frontend_dir = Path(__file__).parent / "frontend"
     cards = {
-        "/meteo_ua/meteo-monthly-card.js": "meteo-monthly-card.js",
-        "/meteo_ua/atmospheric-weather-card.js": "atmospheric-weather-card.js",
         "/meteo_ua/meteo-ua-weather-forecast-card.js": "meteo-ua-weather-forecast-card.js",
     }
 
