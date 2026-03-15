@@ -1,15 +1,15 @@
 name: "Meteo UA Parser"
 description: "Headless browser parser for meteo.ua — provides hourly, daily and current weather via local HTTP API"
-version: "0.2.0"
+version: "0.3.0"
 slug: "meteo_ua_parser"
 url: "https://github.com/dmdukr/ha-addon-meteo-ua-parser"
 arch:
   - amd64
   - aarch64
 ports:
-  5580/tcp: 5580
+  5581/tcp: 5581
 ports_description:
-  5580/tcp: "HTTP API"
+  5581/tcp: "HTTP API"
 options:
   cities:
     - city_id: "34"

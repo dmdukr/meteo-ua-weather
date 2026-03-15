@@ -247,8 +247,8 @@ def main() -> None:
     app.on_startup.append(start_scheduler)
     app.on_cleanup.append(stop_scheduler)
 
-    _LOGGER.info("Meteo UA Parser starting on port 5580")
-    web.run_app(app, host="0.0.0.0", port=5580, print=None)
+    _LOGGER.info("Meteo UA Parser starting on port 5581")
+    web.run_app(app, host="0.0.0.0", port=5581, print=None)
 
 
 if __name__ == "__main__":
