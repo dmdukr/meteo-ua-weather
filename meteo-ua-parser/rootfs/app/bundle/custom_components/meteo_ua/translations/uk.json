@@ -1,0 +1,24 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Meteo UA — вибір міста",
+                "data": {
+                    "city_name": "Місто"
+                }
+            },
+            "custom": {
+                "title": "Meteo UA — довільне місто",
+                "data": {
+                    "city_id": "ID міста (число з URL meteo.ua)",
+                    "city_slug": "Slug міста (з URL)",
+                    "city_name": "Назва міста",
+                    "station_id": "Код метеостанції meteo.gov.ua"
+                }
+            }
+        },
+        "abort": {
+            "already_configured": "Це місто вже налаштоване"
+        }
+    }
+}

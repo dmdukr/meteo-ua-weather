@@ -12,6 +12,7 @@ from typing import Any
 from aiohttp import web
 
 from parser import run_parse_session
+from installer import install_all, uninstall_all
 
 # --- Config ---
 DATA_DIR = Path("/data")
@@ -228,6 +229,13 @@ async def stop_scheduler(app: web.Application) -> None:
 
 # --- Main ---
 
+async def handle_uninstall(request: web.Request) -> web.Response:
+    """Remove integration and card files."""
+    _LOGGER.info("Uninstall requested — removing integration and card")
+    uninstall_all()
+    return web.json_response({"status": "ok", "message": "Integration and card removed"})
+
+
 def main() -> None:
     options = load_options()
     log_level = getattr(logging, options.get("log_level", "info").upper(), logging.INFO)
@@ -237,12 +245,19 @@ def main() -> None:
         stream=sys.stdout,
     )
 
+    # Install/update integration and card on startup
+    _LOGGER.info("Checking integration and card installation...")
+    needs_restart = install_all()
+    if needs_restart:
+        _LOGGER.info("Integration/card installed or updated. HA restart may be needed.")
+
     app = web.Application()
     app.router.add_get("/api/health", handle_health)
     app.router.add_get("/api/current/{city_id}/{city_slug}", handle_current)
     app.router.add_get("/api/hourly/{city_id}/{city_slug}", handle_hourly)
     app.router.add_get("/api/daily/{city_id}/{city_slug}", handle_daily)
     app.router.add_post("/api/refresh", handle_refresh)
+    app.router.add_post("/api/uninstall", handle_uninstall)
 
     app.on_startup.append(start_scheduler)
     app.on_cleanup.append(stop_scheduler)

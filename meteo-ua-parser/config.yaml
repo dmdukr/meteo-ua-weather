@@ -1,6 +1,6 @@
 name: "Meteo UA Parser"
 description: "Headless browser parser for meteo.ua — provides hourly, daily and current weather via local HTTP API"
-version: "0.8.0"
+version: "0.9.0"
 slug: "meteo_ua_parser"
 url: "https://github.com/dmdukr/ha-addon-meteo-ua-parser"
 arch:
@@ -23,3 +23,6 @@ schema:
 startup: "application"
 boot: "auto"
 init: false
+map:
+  - config:rw
+homeassistant_api: true
