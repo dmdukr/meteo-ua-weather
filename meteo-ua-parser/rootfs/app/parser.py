@@ -214,21 +214,24 @@ async def parse_current(page: Page, city_id: str, city_slug: str) -> dict[str, A
     return result
 
 
-async def parse_daily(city_id: str, city_slug: str) -> list[dict[str, Any]]:
-    """Parse 30-day forecast from meteo.ua /month page (plain HTTP, no browser needed)."""
-    import aiohttp
+async def parse_daily(page: "Page", city_id: str, city_slug: str) -> list[dict[str, Any]]:
+    """Parse 30-day forecast from meteo.ua /month page via headless browser."""
+    url = f"https://meteo.ua/ua/{city_id}/{city_slug}/month"
+    _LOGGER.info("Parsing daily (browser): %s", url)
 
-    url = f"https://meteo.ua/{city_id}/{city_slug}/month"
-    _LOGGER.info("Parsing daily (HTTP): %s", url)
+    await page.goto(url, wait_until="networkidle", timeout=30000)
+    await page.wait_for_timeout(3000)
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-            url,
-            headers={"User-Agent": "HomeAssistant/MeteoUA-Addon"},
-            timeout=aiohttp.ClientTimeout(total=20),
-        ) as resp:
-            resp.raise_for_status()
-            html = await resp.text(encoding="utf-8", errors="replace")
+    # Get rendered DOM text for min..max temps
+    body_text = await page.evaluate("() => document.body.innerText")
+    temp_ranges = re.findall(r"([+-]?\d+)\s*°\s*\.\.\s*([+-]?\d+)\s*°", body_text)
+    _LOGGER.info("Found %d temp ranges in DOM for %s", len(temp_ranges), city_slug)
+
+    # Also get the page HTML for data-key parsing (icons, wind, conditions)
+    html = await page.content()
+    import aiohttp  # noqa: keep for type hints
+
+    # html already fetched via page.content() above
 
     temps = re.findall(r'data-key="temperature">([^<]+)', html)
     infos = re.findall(r'data-key="info">([^<]+)', html)
@@ -253,19 +256,6 @@ async def parse_daily(city_id: str, city_slug: str) -> list[dict[str, Any]]:
                 break
         icons_raw = deduped
 
-    # Extract hourly temp_min/temp_max from inline JSON for min/max per day
-    hourly_times = re.findall(r'"local_time":"([^"]+)"', html)
-    hourly_mins = re.findall(r'"temp_min":([-\d.]+)', html)
-    hourly_maxs = re.findall(r'"temp_max":([-\d.]+)', html)
-
-    day_minmax: dict[str, dict[str, float]] = {}
-    for j in range(min(len(hourly_times), len(hourly_mins), len(hourly_maxs))):
-        day_key = hourly_times[j].split(" ")[0]
-        if day_key not in day_minmax:
-            day_minmax[day_key] = {"mins": [], "maxs": []}
-        day_minmax[day_key]["mins"].append(float(hourly_mins[j]))
-        day_minmax[day_key]["maxs"].append(float(hourly_maxs[j]))
-
     today = datetime.now(tz=_TZ_KYIV).replace(hour=12, minute=0, second=0, microsecond=0)
     forecast = []
     for i in range(min(30, len(temps))):
@@ -279,14 +269,6 @@ async def parse_daily(city_id: str, city_slug: str) -> list[dict[str, Any]]:
 
         condition_text = infos[i].strip() if i < len(infos) else ""
         dt = today + timedelta(days=i)
-        day_key = dt.strftime("%Y-%m-%d")
-
-        # Get min/max from hourly data if available
-        temp_low = None
-        temp_high = None
-        if day_key in day_minmax:
-            temp_low = round(min(day_minmax[day_key]["mins"]))
-            temp_high = round(max(day_minmax[day_key]["maxs"]))
 
         entry: dict[str, Any] = {
             "datetime": dt.isoformat(),
@@ -295,10 +277,12 @@ async def parse_daily(city_id: str, city_slug: str) -> list[dict[str, Any]]:
             "condition_text": condition_text,
             "wind_speed": wind_speed,
         }
-        if temp_low is not None:
-            entry["templow"] = temp_low
-        if temp_high is not None:
-            entry["temperature"] = temp_high  # override with actual max
+
+        # Use DOM-rendered min..max if available
+        if i < len(temp_ranges):
+            lo, hi = int(temp_ranges[i][0]), int(temp_ranges[i][1])
+            entry["templow"] = lo
+            entry["temperature"] = hi
 
         forecast.append(entry)
 
@@ -314,56 +298,45 @@ async def run_parse_session(cities: list[dict], parse_types: list[str]) -> dict[
     """
     results: dict[str, dict] = {}
 
-    need_browser = "current" in parse_types or "hourly" in parse_types
+    # All parse types now use headless browser
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-dev-shm-usage"],
+        )
+        page = await browser.new_page()
 
-    if need_browser:
-        async with async_playwright() as pw:
-            browser = await pw.chromium.launch(
-                headless=True,
-                args=["--no-sandbox", "--disable-dev-shm-usage"],
-            )
-            page = await browser.new_page()
-
-            for city in cities:
-                cid = city["city_id"]
-                cslug = city["city_slug"]
-                key = f"{cid}/{cslug}"
-                results.setdefault(key, {})
-
-                try:
-                    if "hourly" in parse_types:
-                        results[key]["hourly"] = await parse_hourly(page, cid, cslug)
-
-                    if "current" in parse_types:
-                        data = await parse_current(page, cid, cslug)
-                        # Fallback: use first hourly entry if current is incomplete
-                        if "temperature" not in data and results[key].get("hourly"):
-                            h0 = results[key]["hourly"][0]
-                            data = {
-                                "temperature": h0["temperature"],
-                                "condition": h0["condition"],
-                                "condition_text": h0.get("condition_text", ""),
-                                "humidity": h0.get("humidity"),
-                                "pressure": h0.get("pressure"),
-                                "wind_speed": h0.get("wind_speed"),
-                                "wind_bearing": h0.get("wind_bearing"),
-                            }
-                        results[key]["current"] = data
-
-                except Exception as exc:
-                    _LOGGER.error("Parse error for %s: %s", key, exc)
-
-            await browser.close()
-
-    if "daily" in parse_types:
         for city in cities:
             cid = city["city_id"]
             cslug = city["city_slug"]
             key = f"{cid}/{cslug}"
             results.setdefault(key, {})
+
             try:
-                results[key]["daily"] = await parse_daily(cid, cslug)
+                if "hourly" in parse_types:
+                    results[key]["hourly"] = await parse_hourly(page, cid, cslug)
+
+                if "current" in parse_types:
+                    data = await parse_current(page, cid, cslug)
+                    if "temperature" not in data and results[key].get("hourly"):
+                        h0 = results[key]["hourly"][0]
+                        data = {
+                            "temperature": h0["temperature"],
+                            "condition": h0["condition"],
+                            "condition_text": h0.get("condition_text", ""),
+                            "humidity": h0.get("humidity"),
+                            "pressure": h0.get("pressure"),
+                            "wind_speed": h0.get("wind_speed"),
+                            "wind_bearing": h0.get("wind_bearing"),
+                        }
+                    results[key]["current"] = data
+
+                if "daily" in parse_types:
+                    results[key]["daily"] = await parse_daily(page, cid, cslug)
+
             except Exception as exc:
-                _LOGGER.error("Daily parse error for %s: %s", key, exc)
+                _LOGGER.error("Parse error for %s: %s", key, exc)
+
+        await browser.close()
 
     return results
