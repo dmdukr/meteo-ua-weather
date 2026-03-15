@@ -15,6 +15,4 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
 
 COPY rootfs/ /
 
-RUN chmod +x /app/run.sh
-
-CMD ["/app/run.sh"]
+CMD ["python3", "/app/main.py"]
