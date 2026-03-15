@@ -1,9 +1,8 @@
 ARG BUILD_FROM
-FROM python:3.11-slim
+FROM mcr.microsoft.com/playwright/python:v1.49.0-noble
 
 COPY rootfs/app/requirements.txt /tmp/
-RUN pip install --no-cache-dir -r /tmp/requirements.txt \
-    && playwright install --with-deps chromium
+RUN pip install --no-cache-dir --break-system-packages -r /tmp/requirements.txt
 
 COPY rootfs/ /
 
