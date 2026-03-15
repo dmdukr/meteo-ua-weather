@@ -253,6 +253,19 @@ async def parse_daily(city_id: str, city_slug: str) -> list[dict[str, Any]]:
                 break
         icons_raw = deduped
 
+    # Extract hourly temp_min/temp_max from inline JSON for min/max per day
+    hourly_times = re.findall(r'"local_time":"([^"]+)"', html)
+    hourly_mins = re.findall(r'"temp_min":([-\d.]+)', html)
+    hourly_maxs = re.findall(r'"temp_max":([-\d.]+)', html)
+
+    day_minmax: dict[str, dict[str, float]] = {}
+    for j in range(min(len(hourly_times), len(hourly_mins), len(hourly_maxs))):
+        day_key = hourly_times[j].split(" ")[0]
+        if day_key not in day_minmax:
+            day_minmax[day_key] = {"mins": [], "maxs": []}
+        day_minmax[day_key]["mins"].append(float(hourly_mins[j]))
+        day_minmax[day_key]["maxs"].append(float(hourly_maxs[j]))
+
     today = datetime.now(tz=_TZ_KYIV).replace(hour=12, minute=0, second=0, microsecond=0)
     forecast = []
     for i in range(min(30, len(temps))):
@@ -266,14 +279,28 @@ async def parse_daily(city_id: str, city_slug: str) -> list[dict[str, Any]]:
 
         condition_text = infos[i].strip() if i < len(infos) else ""
         dt = today + timedelta(days=i)
+        day_key = dt.strftime("%Y-%m-%d")
 
-        forecast.append({
+        # Get min/max from hourly data if available
+        temp_low = None
+        temp_high = None
+        if day_key in day_minmax:
+            temp_low = round(min(day_minmax[day_key]["mins"]))
+            temp_high = round(max(day_minmax[day_key]["maxs"]))
+
+        entry: dict[str, Any] = {
             "datetime": dt.isoformat(),
             "temperature": temp,
             "condition": _map_condition(condition_text),
             "condition_text": condition_text,
             "wind_speed": wind_speed,
-        })
+        }
+        if temp_low is not None:
+            entry["templow"] = temp_low
+        if temp_high is not None:
+            entry["temperature"] = temp_high  # override with actual max
+
+        forecast.append(entry)
 
     _LOGGER.info("Parsed %d daily entries for %s", len(forecast), city_slug)
     return forecast
