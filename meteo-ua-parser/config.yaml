@@ -1,5 +1,5 @@
 name: "Meteo UA Parser"
-description: "Headless browser parser for meteo.ua — provides hourly, daily and current weather via local HTTP API"
+description: "Погода з meteo.ua для Home Assistant. При першому запуску автоматично встановить інтеграцію Meteo UA Weather та карточку прогнозу погоди. / Weather from meteo.ua. On first start automatically installs Meteo UA Weather integration and forecast card."
 version: "0.9.0"
 slug: "meteo_ua_parser"
 url: "https://github.com/dmdukr/ha-addon-meteo-ua-parser"
