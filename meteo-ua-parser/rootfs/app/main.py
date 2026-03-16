@@ -272,27 +272,7 @@ def _notify_restart(message: str | None = None) -> None:
             "Restart Home Assistant to activate."
         )
 
-    # Try repair issue first (appears in Settings like HACS)
-    try:
-        data = json.dumps({
-            "domain": "homeassistant",
-            "issue_id": "meteo_ua_restart_required",
-            "is_fixable": False,
-            "severity": "warning",
-            "translation_key": "restart_required",
-            "translation_placeholders": {},
-        }).encode()
-        req = urllib.request.Request(
-            "http://supervisor/core/api/repairs/issues",
-            data=data, headers=headers, method="POST",
-        )
-        urllib.request.urlopen(req, timeout=10)
-        _LOGGER.info("Repair issue created in HA")
-        return
-    except Exception as exc:
-        _LOGGER.info("Repair issue not available (%s), falling back to notification", exc)
-
-    # Fallback: persistent notification
+    # Send persistent notification
     try:
         data = json.dumps({
             "title": "Meteo UA Parser",
@@ -322,15 +302,24 @@ def _request_ha_restart() -> None:
         "Content-Type": "application/json",
     }
 
-    try:
-        req = urllib.request.Request(
-            "http://supervisor/core/restart",
-            data=b"", headers=headers, method="POST",
-        )
-        urllib.request.urlopen(req, timeout=30)
-        _LOGGER.info("HA Core restart requested")
-    except Exception as exc:
-        _LOGGER.warning("Failed to request HA restart: %s", exc)
+    # Try multiple endpoints — permissions vary by addon config
+    endpoints = [
+        "http://supervisor/homeassistant/restart",
+        "http://supervisor/core/restart",
+    ]
+
+    for url in endpoints:
+        try:
+            req = urllib.request.Request(
+                url, data=b"", headers=headers, method="POST",
+            )
+            urllib.request.urlopen(req, timeout=30)
+            _LOGGER.info("HA Core restart requested via %s", url)
+            return
+        except Exception as exc:
+            _LOGGER.info("Restart via %s failed: %s", url, exc)
+
+    _LOGGER.warning("Could not restart HA — user must restart manually")
 
 
 def main() -> None:

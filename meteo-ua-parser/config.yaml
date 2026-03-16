@@ -9,7 +9,7 @@ description: >-
   On first start automatically installs Meteo UA Weather integration and
   forecast card. HA restart required after installation.
   Before removing the add-on, remove the integration via Settings → Integrations.
-version: "0.12.0"
+version: "0.13.0"
 slug: "meteo_ua_parser"
 url: "https://github.com/dmdukr/ha-addon-meteo-ua-parser"
 arch:
@@ -35,3 +35,4 @@ init: false
 map:
   - config:rw
 homeassistant_api: true
+hassio_role: "manager"
