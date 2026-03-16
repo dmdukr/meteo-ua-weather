@@ -251,7 +251,7 @@ async def handle_test_notify(request: web.Request) -> web.Response:
 
 
 def _notify_restart(message: str | None = None) -> None:
-    """Send persistent notification via Supervisor API."""
+    """Create a repair issue via Supervisor API (like HACS does)."""
     import urllib.request
 
     supervisor_token = os.environ.get("SUPERVISOR_TOKEN", "")
@@ -267,12 +267,32 @@ def _notify_restart(message: str | None = None) -> None:
     if message is None:
         message = (
             "Інтеграцію Meteo UA Weather та карточку прогнозу встановлено. "
-            "**[Перезавантажте Home Assistant](/developer-tools/yaml)** для активації.\n\n"
+            "Перезавантажте Home Assistant для активації.\n\n"
             "Meteo UA Weather integration and forecast card installed. "
-            "**[Restart Home Assistant](/developer-tools/yaml)** to activate."
+            "Restart Home Assistant to activate."
         )
 
-    # Create persistent notification
+    # Try repair issue first (appears in Settings like HACS)
+    try:
+        data = json.dumps({
+            "domain": "homeassistant",
+            "issue_id": "meteo_ua_restart_required",
+            "is_fixable": False,
+            "severity": "warning",
+            "translation_key": "restart_required",
+            "translation_placeholders": {},
+        }).encode()
+        req = urllib.request.Request(
+            "http://supervisor/core/api/repairs/issues",
+            data=data, headers=headers, method="POST",
+        )
+        urllib.request.urlopen(req, timeout=10)
+        _LOGGER.info("Repair issue created in HA")
+        return
+    except Exception as exc:
+        _LOGGER.info("Repair issue not available (%s), falling back to notification", exc)
+
+    # Fallback: persistent notification
     try:
         data = json.dumps({
             "title": "Meteo UA Parser",
