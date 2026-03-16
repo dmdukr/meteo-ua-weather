@@ -22,6 +22,14 @@ ADDON_SLUG = "05f6fddb_meteo_ua_parser"
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up from YAML — not used, config_flow only."""
+    # Clean up addon restart marker if exists (restart already happened)
+    marker = Path(hass.config.path(".meteo_ua_restart_required"))
+    if marker.exists():
+        marker.unlink(missing_ok=True)
+        # Dismiss the persistent notification since restart completed
+        from homeassistant.components.persistent_notification import async_dismiss
+        async_dismiss(hass, "meteo_ua_restart_required")
+        _LOGGER.info("Restart completed — cleaned up marker and notification")
     return True
 
 

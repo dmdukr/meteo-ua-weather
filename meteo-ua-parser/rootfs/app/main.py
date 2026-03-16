@@ -19,6 +19,7 @@ from installer import install_all, uninstall_all
 DATA_DIR = Path("/data")
 CACHE_FILE = DATA_DIR / "cache.json"
 SCHEDULE_FILE = DATA_DIR / "schedule.json"
+CITIES_FILE = DATA_DIR / "cities.json"
 OPTIONS_FILE = Path("/data/options.json")
 
 _LOGGER = logging.getLogger("meteo_ua_parser")
@@ -28,11 +29,23 @@ def load_options() -> dict:
     """Load add-on options."""
     if OPTIONS_FILE.exists():
         return json.loads(OPTIONS_FILE.read_text())
-    # Fallback for development
-    return {
-        "cities": [{"city_id": "34", "city_slug": "kiev"}],
-        "log_level": "info",
-    }
+    return {"log_level": "info"}
+
+
+def load_cities() -> list[dict]:
+    """Load registered cities from /data/cities.json."""
+    if CITIES_FILE.exists():
+        try:
+            return json.loads(CITIES_FILE.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            pass
+    return []
+
+
+def save_cities(cities: list[dict]) -> None:
+    """Save registered cities."""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    CITIES_FILE.write_text(json.dumps(cities, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def load_cache() -> dict[str, Any]:
@@ -124,8 +137,7 @@ async def handle_current(request: web.Request) -> web.Response:
 
 async def handle_refresh(request: web.Request) -> web.Response:
     """Manual refresh trigger."""
-    options = load_options()
-    cities = options.get("cities", [])
+    cities = load_cities()
 
     _LOGGER.info("Manual refresh triggered for %d cities", len(cities))
     try:
@@ -141,38 +153,96 @@ async def handle_refresh(request: web.Request) -> web.Response:
         return web.json_response({"status": "error", "error": str(exc)}, status=500)
 
 
+async def handle_register_city(request: web.Request) -> web.Response:
+    """Register a city for parsing. Called by integration on setup."""
+    data = await request.json()
+    city_id = str(data.get("city_id", ""))
+    city_slug = str(data.get("city_slug", ""))
+
+    if not city_id or not city_slug:
+        return web.json_response({"error": "city_id and city_slug required"}, status=400)
+
+    cities = load_cities()
+    # Check if already registered
+    if any(c["city_id"] == city_id and c["city_slug"] == city_slug for c in cities):
+        return web.json_response({"status": "ok", "message": "already registered"})
+
+    cities.append({"city_id": city_id, "city_slug": city_slug})
+    save_cities(cities)
+    _LOGGER.info("City registered: %s/%s (total: %d)", city_id, city_slug, len(cities))
+
+    # Parse immediately for the new city
+    try:
+        results = await run_parse_session(
+            [{"city_id": city_id, "city_slug": city_slug}],
+            ["current", "hourly", "daily"],
+        )
+        cache = load_cache()
+        cache.setdefault("data", {}).update(results)
+        now = datetime.now(timezone.utc).isoformat()
+        cache.setdefault("last_update", {}).update({"current": now, "hourly": now, "daily": now})
+        save_cache(cache)
+    except Exception as exc:
+        _LOGGER.warning("Initial parse for %s/%s failed: %s", city_id, city_slug, exc)
+
+    return web.json_response({"status": "ok", "cities": len(cities)})
+
+
+async def handle_unregister_city(request: web.Request) -> web.Response:
+    """Unregister a city. Called by integration on removal."""
+    data = await request.json()
+    city_id = str(data.get("city_id", ""))
+    city_slug = str(data.get("city_slug", ""))
+
+    cities = load_cities()
+    cities = [c for c in cities if not (c["city_id"] == city_id and c["city_slug"] == city_slug)]
+    save_cities(cities)
+
+    # Remove cached data for this city
+    key = f"{city_id}/{city_slug}"
+    cache = load_cache()
+    cache.get("data", {}).pop(key, None)
+    save_cache(cache)
+
+    _LOGGER.info("City unregistered: %s/%s (remaining: %d)", city_id, city_slug, len(cities))
+    return web.json_response({"status": "ok", "cities": len(cities)})
+
+
+async def handle_list_cities(request: web.Request) -> web.Response:
+    """List registered cities."""
+    return web.json_response(load_cities())
+
+
 # --- Scheduler ---
 
 async def scheduler(app: web.Application) -> None:
     """Background scheduler — runs cron-like tasks."""
-    options = load_options()
-    cities = options.get("cities", [])
     schedule = get_schedule()
 
-    _LOGGER.info("Scheduler started. Cities: %s", [c["city_slug"] for c in cities])
-
     # Initial parse on startup
-    _LOGGER.info("Running initial parse...")
-    try:
-        results = await run_parse_session(cities, ["current", "hourly", "daily"])
-        cache = {"data": results}
-        now = datetime.now(timezone.utc).isoformat()
-        cache["last_update"] = {"current": now, "hourly": now, "daily": now}
-        save_cache(cache)
-        _LOGGER.info("Initial parse complete: %d cities", len(results))
-    except Exception as exc:
-        _LOGGER.error("Initial parse failed: %s", exc)
+    cities = load_cities()
+    if cities:
+        _LOGGER.info("Running initial parse for %d cities...", len(cities))
+        try:
+            results = await run_parse_session(cities, ["current", "hourly", "daily"])
+            cache = {"data": results}
+            now = datetime.now(timezone.utc).isoformat()
+            cache["last_update"] = {"current": now, "hourly": now, "daily": now}
+            save_cache(cache)
+            _LOGGER.info("Initial parse complete: %d cities", len(results))
+        except Exception as exc:
+            _LOGGER.error("Initial parse failed: %s", exc)
+    else:
+        _LOGGER.info("No cities registered — waiting for integration to register cities")
 
     while True:
         try:
             now = datetime.now(timezone(timedelta(hours=2)))  # Kyiv time
-            current_minute = now.minute
-            current_hour = now.hour
 
             # Wait until next minute boundary
             next_minute = now.replace(second=0, microsecond=0) + timedelta(minutes=1)
             wait_seconds = (next_minute - now).total_seconds()
-            await asyncio.sleep(wait_seconds + 1)  # +1 to be safely in the new minute
+            await asyncio.sleep(wait_seconds + 1)
 
             now = datetime.now(timezone(timedelta(hours=2)))
             minute = now.minute
@@ -180,7 +250,6 @@ async def scheduler(app: web.Application) -> None:
 
             parse_types = []
 
-            # Check which schedules match this minute
             if minute == schedule["current_minute"]:
                 parse_types.append("current")
 
@@ -193,8 +262,12 @@ async def scheduler(app: web.Application) -> None:
             if not parse_types:
                 continue
 
-            # Combine into one Chromium session
-            _LOGGER.info("Scheduled parse: %s at %02d:%02d", parse_types, hour, minute)
+            # Re-read cities each time (integration may have added/removed)
+            cities = load_cities()
+            if not cities:
+                continue
+
+            _LOGGER.info("Scheduled parse: %s at %02d:%02d (%d cities)", parse_types, hour, minute, len(cities))
             results = await run_parse_session(cities, parse_types)
 
             cache = load_cache()
@@ -272,7 +345,15 @@ def _notify_restart(message: str | None = None) -> None:
             "Restart Home Assistant to activate."
         )
 
-    # Send persistent notification
+    # Create marker file for integration to pick up and create repair issue
+    marker = Path("/config/.meteo_ua_restart_required")
+    try:
+        marker.write_text(message or "restart required", encoding="utf-8")
+        _LOGGER.info("Restart marker created at %s", marker)
+    except OSError as exc:
+        _LOGGER.warning("Failed to create marker: %s", exc)
+
+    # Also send persistent notification as fallback
     try:
         data = json.dumps({
             "title": "Meteo UA Parser",
@@ -350,6 +431,9 @@ def main() -> None:
     app.router.add_post("/api/refresh", handle_refresh)
     app.router.add_post("/api/uninstall", handle_uninstall)
     app.router.add_post("/api/test-notify", handle_test_notify)
+    app.router.add_post("/api/cities/register", handle_register_city)
+    app.router.add_post("/api/cities/unregister", handle_unregister_city)
+    app.router.add_get("/api/cities", handle_list_cities)
 
     app.on_startup.append(start_scheduler)
     app.on_cleanup.append(stop_scheduler)

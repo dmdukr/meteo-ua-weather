@@ -9,7 +9,7 @@ description: >-
   On first start automatically installs Meteo UA Weather integration and
   forecast card. HA restart required after installation.
   Before removing the add-on, remove the integration via Settings → Integrations.
-version: "0.14.0"
+version: "0.16.0"
 slug: "meteo_ua_parser"
 url: "https://github.com/dmdukr/ha-addon-meteo-ua-parser"
 arch:
@@ -20,14 +20,8 @@ ports:
 ports_description:
   5581/tcp: "HTTP API"
 options:
-  cities:
-    - city_id: "34"
-      city_slug: "kiev"
   log_level: "info"
 schema:
-  cities:
-    - city_id: str
-      city_slug: str
   log_level: list(debug|info|warning|error)
 startup: "application"
 boot: "auto"

@@ -1,4 +1,17 @@
 {
+    "issues": {
+        "restart_required": {
+            "title": "Потрібне перезавантаження",
+            "fix_flow": {
+                "step": {
+                    "confirm": {
+                        "title": "Перезавантажте Home Assistant",
+                        "description": "Інтеграцію Meteo UA Weather встановлено або оновлено. Перезавантажте Home Assistant для активації."
+                    }
+                }
+            }
+        }
+    },
     "config": {
         "step": {
             "user": {
