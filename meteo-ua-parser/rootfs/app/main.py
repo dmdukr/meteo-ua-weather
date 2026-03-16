@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import random
+import signal
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -233,11 +234,17 @@ async def handle_uninstall(request: web.Request) -> web.Response:
     """Remove integration and card files."""
     _LOGGER.info("Uninstall requested — removing integration and card")
     uninstall_all()
+    _notify_restart(
+        "Інтеграцію Meteo UA Weather та карточку прогнозу видалено. "
+        "Перезавантажте Home Assistant для завершення.\n\n"
+        "Meteo UA Weather integration and forecast card removed. "
+        "Restart Home Assistant to complete removal."
+    )
     return web.json_response({"status": "ok", "message": "Integration and card removed"})
 
 
-def _notify_restart() -> None:
-    """Send persistent notification + request HA restart via Supervisor API."""
+def _notify_restart(message: str | None = None) -> None:
+    """Send persistent notification via Supervisor API."""
     import urllib.request
 
     supervisor_token = os.environ.get("SUPERVISOR_TOKEN", "")
@@ -250,14 +257,19 @@ def _notify_restart() -> None:
         "Content-Type": "application/json",
     }
 
+    if message is None:
+        message = (
+            "Інтеграцію Meteo UA Weather та карточку прогнозу встановлено. "
+            "Перезавантажте Home Assistant для активації.\n\n"
+            "Meteo UA Weather integration and forecast card installed. "
+            "Restart Home Assistant to activate."
+        )
+
     # Create persistent notification
     try:
         data = json.dumps({
             "title": "Meteo UA Parser",
-            "message": "Інтеграцію Meteo UA Weather та карточку прогнозу встановлено. "
-                       "Перезавантажте Home Assistant для активації.\n\n"
-                       "Meteo UA Weather integration and forecast card installed. "
-                       "Restart Home Assistant to activate.",
+            "message": message,
             "notification_id": "meteo_ua_restart_required",
         }).encode()
         req = urllib.request.Request(
@@ -265,9 +277,13 @@ def _notify_restart() -> None:
             data=data, headers=headers, method="POST",
         )
         urllib.request.urlopen(req, timeout=10)
-        _LOGGER.info("Restart notification sent to HA")
+        _LOGGER.info("Notification sent to HA")
     except Exception as exc:
         _LOGGER.warning("Failed to send notification: %s", exc)
+
+    # Also log SUPERVISOR_TOKEN presence for debugging
+    _LOGGER.info("SUPERVISOR_TOKEN present: %s, length: %d",
+                 bool(supervisor_token), len(supervisor_token))
 
 
 def main() -> None:
@@ -278,6 +294,11 @@ def main() -> None:
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
         stream=sys.stdout,
     )
+
+    # Debug: log environment for troubleshooting
+    supervisor_token = os.environ.get("SUPERVISOR_TOKEN", "")
+    _LOGGER.info("SUPERVISOR_TOKEN present: %s, length: %d", bool(supervisor_token), len(supervisor_token))
+    _LOGGER.info("HASSIO_TOKEN present: %s", bool(os.environ.get("HASSIO_TOKEN", "")))
 
     # Install/update integration and card on startup
     _LOGGER.info("Checking integration and card installation...")
