@@ -558,11 +558,11 @@ let t,e;function i(t,e,i,r){Object.defineProperty(t,e,{get:i,set:r,enumerable:!0
       font-weight: bold;
     }
     .mg-temp.on-light {
-      color: rgba(40, 40, 60, 0.9);
-      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+      color: #8b6914;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
     }
     .mg-temp.on-dark {
-      color: #fff;
+      color: #4fc3f7;
       text-shadow:
         0 1px 3px rgba(0, 0, 0, 0.7),
         0 0 6px rgba(0, 0, 0, 0.3);
@@ -571,11 +571,11 @@ let t,e;function i(t,e,i,r){Object.defineProperty(t,e,{get:i,set:r,enumerable:!0
       font-size: 0.6em;
     }
     .mg-wind.on-light {
-      color: rgba(40, 40, 60, 0.7);
+      color: rgba(80, 60, 20, 0.7);
       text-shadow: none;
     }
     .mg-wind.on-dark {
-      color: rgba(255, 255, 255, 0.85);
+      color: rgba(200, 220, 240, 0.85);
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
   `}updated(t){super.updated(t),this.dailyForecast?.length&&requestAnimationFrame(()=>this._updateWaveMasks())}_updateWaveMasks(){this.renderRoot.querySelectorAll(".mg-row-wrapper").forEach(t=>{let e=t.getBoundingClientRect();if(0===e.width)return;let i=t.querySelectorAll(".mg-day"),r=t.querySelector(".mg-wave-svg");if(!r)return;let s=r.querySelector("mask");if(s){for(;s.firstChild;)s.removeChild(s.firstChild);i.forEach(t=>{let i=t.getBoundingClientRect(),r=(i.left-e.left)/e.width*100,a=(i.top-e.top)/e.height*100,o=i.width/e.width*100,n=i.height/e.height*100,l=document.createElementNS("http://www.w3.org/2000/svg","rect");l.setAttribute("x",`${r}`),l.setAttribute("y",`${a}`),l.setAttribute("width",`${o}`),l.setAttribute("height",`${n}`),l.setAttribute("rx","1.5"),l.setAttribute("fill","white"),s.appendChild(l)})}})}render(){if(!this.config||!this.dailyForecast?.length)return eG;let t=this.config.monthly_grid;if(t?.show===!1)return eG;let e=t?.columns||6,i=t?.show_wind!==!1,r=t?.compact||!1,s=t?.show_chart!==!1;r?this.setAttribute("compact",""):this.removeAttribute("compact");let a=this.hass?.language||"uk",o="uk"===a||"ru"===a?"uk-UA":"en-US",n="uk"===a||"ru"===a?"м/с":"m/s",l=new Set;if(this.hourlyForecast)for(let t of this.hourlyForecast)t.datetime&&l.add(new Date(t.datetime).toISOString().split("T")[0]);let h=new Date().toISOString().split("T")[0],c=this.dailyForecast.map(t=>t.temperature).filter(t=>null!=t),d=Math.min(...c),u=Math.max(...c),p=[];for(let t=0;t<this.dailyForecast.length;t+=e)p.push(this.dailyForecast.slice(t,t+e));return eq`${p.map((t,r)=>{let a=t.length,c=t.map((t,e)=>({x:(e+.5)/a*100,y:100-((t.temperature??d)-d)/(u-d||1)*60-20}));if(c.length>0){let t=c[0],e=c[c.length-1];c.unshift({x:0,y:t.y}),c.push({x:100,y:e.y})}let p=function(t){if(t.length<2)return"";let e=[`M ${t[0].x} ${t[0].y}`];for(let i=0;i<t.length-1;i++){let r=t[Math.max(0,i-1)],s=t[i],a=t[i+1],o=t[Math.min(t.length-1,i+2)],n=s.x+(a.x-r.x)*.5/3,l=s.y+(a.y-r.y)*.5/3,h=a.x-(o.x-s.x)*.5/3,c=a.y-(o.y-s.y)*.5/3;e.push(`C ${n} ${l}, ${h} ${c}, ${a.x} ${a.y}`)}return e.join(" ")}(c),f=`${p} L 100 100 L 0 100 Z`,g=`wg-${r}-${Math.random().toString(36).slice(2,6)}`,m=`wm-${g}`,y=[t[0]?.temperature??d,...t.map(t=>t.temperature??d),t[t.length-1]?.temperature??d],b=c.map((t,e)=>{var i;return eX`<stop offset="${t.x}%" stop-color="${(i=y[e])<=-10?"#4fb3ff":i<=0?"#2196f3":i<=8?"#8bc34a":i<=18?"#ffeb3b":i<=26?"#ff9800":"#f44336"}" />`}),_=t.map((t,e)=>eX`<rect x="${e/a*100+.5}" y="0"
@@ -586,7 +586,7 @@ let t,e;function i(t,e,i,r){Object.defineProperty(t,e,{get:i,set:r,enumerable:!0
                 <linearGradient id="${g}">${b}</linearGradient>
                 <mask id="${m}">${_}</mask>
               </defs>
-              <path d="${f}" fill="url(#${g})" opacity="1" mask="url(#${m})" />
+              <path d="${f}" fill="url(#${g})" opacity="0.9" mask="url(#${m})" />
             </svg>
           `:eG,x=t.map(t=>{var e;let i,r=(t.datetime?new Date(t.datetime):new Date).toISOString().split("T")[0],s=l.has(r)||r===h,a=this.selectedDate===r,o=(e=t.condition,i=s?.85:.55,({sunny:`rgba(30,150,180,${i})`,"clear-night":`rgba(20,50,100,${i})`,partlycloudy:`rgba(70,130,160,${i})`,cloudy:`rgba(120,125,135,${i})`,fog:`rgba(150,155,160,${i})`,rainy:`rgba(75,105,150,${i})`,pouring:`rgba(40,75,140,${i})`,lightning:`rgba(80,90,160,${i})`,"lightning-rainy":`rgba(70,85,155,${i})`,snowy:`rgba(180,190,205,${i})`,"snowy-rainy":`rgba(155,170,190,${i})`,hail:`rgba(100,130,170,${i})`,windy:`rgba(90,120,145,${i})`,"windy-variant":`rgba(90,120,145,${i})`,exceptional:`rgba(140,70,70,${i})`})[e??""]??`rgba(90,110,130,${i})`);return eq`
           <div
