@@ -105,22 +105,31 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 
 async def _register_card(hass: HomeAssistant) -> None:
-    """Register the Lovelace card JS as a Lovelace resource."""
+    """Register the Lovelace card JS as a Lovelace resource with cache-busting."""
     if hass.data.get(DOMAIN, {}).get("_card_registered"):
         return
 
+    import json as _json
     from homeassistant.components.http import StaticPathConfig
 
     frontend_dir = Path(__file__).parent / "frontend"
-    card_url = "/meteo_ua/meteo-ua-weather-forecast-card.js"
+    card_base_url = "/meteo_ua/meteo-ua-weather-forecast-card.js"
     card_file = "meteo-ua-weather-forecast-card.js"
+
+    # Get version for cache-busting
+    try:
+        manifest = _json.loads((Path(__file__).parent / "manifest.json").read_text())
+        version = manifest.get("version", "0")
+    except Exception:
+        version = "0"
+    card_url = f"{card_base_url}?v={version}"
 
     # Register static path so the JS file is served by HA
     await hass.http.async_register_static_paths([
         StaticPathConfig(
-            url_path=card_url,
+            url_path=card_base_url,
             path=str(frontend_dir / card_file),
-            cache_headers=True,
+            cache_headers=False,
         )
     ])
 
@@ -136,17 +145,24 @@ async def _register_card(hass: HomeAssistant) -> None:
         lovelace_data = hass.data.get(LOVELACE_DOMAIN)
         if lovelace_data and hasattr(lovelace_data, "resources"):
             resources: ResourceStorageCollection = lovelace_data.resources
-            # Check if already registered
+            # Find existing registration (match base URL without version)
             existing = [
                 r for r in resources.async_items()
-                if card_url in r.get("url", "")
+                if card_base_url in r.get("url", "")
             ]
             if not existing:
                 await resources.async_create_item({
                     "res_type": "module",
                     "url": card_url,
                 })
-                _LOGGER.info("Meteo UA: registered card as Lovelace resource")
+                _LOGGER.info("Meteo UA: registered card as Lovelace resource (%s)", card_url)
+            elif existing[0].get("url") != card_url:
+                # Version changed — update URL for cache-busting
+                await resources.async_update_item(existing[0]["id"], {
+                    "res_type": "module",
+                    "url": card_url,
+                })
+                _LOGGER.info("Meteo UA: updated card resource URL (%s)", card_url)
             else:
                 _LOGGER.info("Meteo UA: card already in Lovelace resources")
         else:
