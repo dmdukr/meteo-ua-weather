@@ -309,9 +309,10 @@ async def handle_uninstall(request: web.Request) -> web.Response:
     uninstall_all()
     _notify_restart(
         "Інтеграцію Meteo UA Weather та карточку прогнозу видалено. "
-        "Перезавантажте Home Assistant для завершення.\n\n"
+        "**[Перезавантажте Home Assistant](/developer-tools/yaml)** для завершення.\n\n"
         "Meteo UA Weather integration and forecast card removed. "
-        "Restart Home Assistant to complete removal."
+        "**[Restart Home Assistant](/developer-tools/yaml)** to complete removal.",
+        notification_id="meteo_ua_removed",
     )
     return web.json_response({"status": "ok", "message": "Integration and card removed"})
 
@@ -323,8 +324,8 @@ async def handle_test_notify(request: web.Request) -> web.Response:
     return web.json_response({"status": "ok", "message": "Test notification sent"})
 
 
-def _notify_restart(message: str | None = None) -> None:
-    """Create a repair issue via Supervisor API (like HACS does)."""
+def _notify_restart(message: str, notification_id: str = "meteo_ua_restart_required") -> None:
+    """Send persistent notification to HA via Supervisor API."""
     import urllib.request
 
     supervisor_token = os.environ.get("SUPERVISOR_TOKEN", "")
@@ -337,61 +338,22 @@ def _notify_restart(message: str | None = None) -> None:
         "Content-Type": "application/json",
     }
 
-    if message is None:
-        message = (
-            "Інтеграцію Meteo UA Weather та карточку прогнозу встановлено. "
-            "Перезавантажте Home Assistant для активації.\n\n"
-            "Meteo UA Weather integration and forecast card installed. "
-            "Restart Home Assistant to activate."
-        )
-
-    # Create marker file for integration to pick up and create repair issue
-    marker = Path("/config/.meteo_ua_restart_required")
-    try:
-        marker.write_text(message or "restart required", encoding="utf-8")
-        _LOGGER.info("Restart marker created at %s", marker)
-    except OSError as exc:
-        _LOGGER.warning("Failed to create marker: %s", exc)
-
-    # Also send persistent notification as fallback
     try:
         data = json.dumps({
-            "title": "Meteo UA Parser",
+            "title": "Meteo UA Weather",
             "message": message,
-            "notification_id": "meteo_ua_restart_required",
+            "notification_id": notification_id,
         }).encode()
         req = urllib.request.Request(
             "http://supervisor/core/api/services/persistent_notification/create",
             data=data, headers=headers, method="POST",
         )
         urllib.request.urlopen(req, timeout=10)
-        _LOGGER.info("Notification sent to HA")
+        _LOGGER.info("Notification sent to HA (id: %s)", notification_id)
     except Exception as exc:
         _LOGGER.warning("Failed to send notification: %s", exc)
 
 
-def _request_ha_restart() -> None:
-    """Request HA Core restart via Supervisor API."""
-    import urllib.request
-
-    supervisor_token = os.environ.get("SUPERVISOR_TOKEN", "")
-    if not supervisor_token:
-        _LOGGER.warning("No SUPERVISOR_TOKEN — cannot restart HA")
-        return
-
-    headers = {
-        "Authorization": f"Bearer {supervisor_token}",
-        "Content-Type": "application/json",
-    }
-
-    url = "http://supervisor/core/restart"
-    try:
-        req = urllib.request.Request(url, data=b"{}", headers=headers, method="POST")
-        resp = urllib.request.urlopen(req, timeout=60)
-        _LOGGER.info("HA Core restart requested successfully (status: %s)", resp.status)
-    except Exception as exc:
-        _LOGGER.warning("Failed to restart HA via %s: %s", url, exc)
-        _LOGGER.info("User must restart HA manually")
 
 
 def main() -> None:
@@ -421,13 +383,28 @@ def main() -> None:
 
     # Install/update integration and card on startup
     _LOGGER.info("Checking integration and card installation...")
-    changed = install_all()
-    if changed:
-        _LOGGER.info("Integration/card installed or updated — sending restart notification")
-        _notify_restart()
-        _request_ha_restart()
+    changes = install_all()
+
+    if changes.get("integration") or changes.get("new_install"):
+        _LOGGER.info("Integration changed — notifying user to restart HA")
+        _notify_restart(
+            "Інтеграцію Meteo UA Weather оновлено. "
+            "**[Перезавантажте Home Assistant](/developer-tools/yaml)** для активації змін.\n\n"
+            "Meteo UA Weather integration updated. "
+            "**[Restart Home Assistant](/developer-tools/yaml)** to activate changes.",
+            notification_id="meteo_ua_restart_required",
+        )
+    elif changes.get("card"):
+        _LOGGER.info("Card JS changed — notifying user to refresh browser")
+        _notify_restart(
+            "Карточку Meteo UA Weather оновлено. "
+            "Оновіть сторінку у браузері (**Ctrl+Shift+R**).\n\n"
+            "Meteo UA Weather card updated. "
+            "Refresh your browser (**Ctrl+Shift+R**).",
+            notification_id="meteo_ua_card_updated",
+        )
     else:
-        _LOGGER.info("Integration and card up to date — no restart needed")
+        _LOGGER.info("Integration and card up to date — no action needed")
 
     app = web.Application()
     app.router.add_get("/api/health", handle_health)
