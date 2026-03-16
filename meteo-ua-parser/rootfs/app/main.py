@@ -267,9 +267,9 @@ def _notify_restart(message: str | None = None) -> None:
     if message is None:
         message = (
             "Інтеграцію Meteo UA Weather та карточку прогнозу встановлено. "
-            "Перезавантажте Home Assistant для активації.\n\n"
+            "**[Перезавантажте Home Assistant](/developer-tools/yaml)** для активації.\n\n"
             "Meteo UA Weather integration and forecast card installed. "
-            "Restart Home Assistant to activate."
+            "**[Restart Home Assistant](/developer-tools/yaml)** to activate."
         )
 
     # Create persistent notification
@@ -289,6 +289,29 @@ def _notify_restart(message: str | None = None) -> None:
         _LOGGER.warning("Failed to send notification: %s", exc)
 
 
+def _request_ha_restart() -> None:
+    """Request HA Core restart via Supervisor API."""
+    import urllib.request
+
+    supervisor_token = os.environ.get("SUPERVISOR_TOKEN", "")
+    if not supervisor_token:
+        return
+
+    headers = {
+        "Authorization": f"Bearer {supervisor_token}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        req = urllib.request.Request(
+            "http://supervisor/core/restart",
+            data=b"", headers=headers, method="POST",
+        )
+        urllib.request.urlopen(req, timeout=30)
+        _LOGGER.info("HA Core restart requested")
+    except Exception as exc:
+        _LOGGER.warning("Failed to request HA restart: %s", exc)
+
 
 def main() -> None:
     options = load_options()
@@ -306,6 +329,7 @@ def main() -> None:
     if changed:
         _LOGGER.info("Integration/card installed or updated — sending restart notification")
         _notify_restart()
+        _request_ha_restart()
     else:
         _LOGGER.info("Integration and card up to date — no restart needed")
 
