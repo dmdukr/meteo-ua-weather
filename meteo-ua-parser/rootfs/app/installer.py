@@ -101,9 +101,12 @@ def install_integration() -> dict[str, bool]:
             _LOGGER.info("Installing integration v%s to %s", src_v, INTEGRATION_DST)
         else:
             dst_v = json.loads((INTEGRATION_DST / "manifest.json").read_text()).get("version", "?")
-            _LOGGER.info("Updating integration v%s → v%s", dst_v, src_v)
+            if src_v != dst_v:
+                _LOGGER.info("Updating integration v%s → v%s", dst_v, src_v)
+            else:
+                _LOGGER.info("Updating integration v%s (files changed)", src_v)
     except Exception:
-        _LOGGER.info("Installing/updating integration")
+        pass
 
     # Always copy full bundle (atomic update)
     INTEGRATION_DST.parent.mkdir(parents=True, exist_ok=True)

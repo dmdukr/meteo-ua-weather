@@ -233,7 +233,7 @@ async def scheduler(app: web.Application) -> None:
         except Exception as exc:
             _LOGGER.error("Initial parse failed: %s", exc)
     else:
-        _LOGGER.info("No cities registered — waiting for integration to register cities")
+        _LOGGER.warning("No cities registered — waiting for integration to register cities")
 
     while True:
         try:
