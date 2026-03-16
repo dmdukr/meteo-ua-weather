@@ -360,25 +360,11 @@ def main() -> None:
     options = load_options()
     log_level = getattr(logging, options.get("log_level", "info").upper(), logging.INFO)
 
-    class ColorFormatter(logging.Formatter):
-        """Color log output — errors red, warnings yellow."""
-        COLORS = {
-            logging.ERROR: "\033[91m",    # red
-            logging.CRITICAL: "\033[91m", # red
-            logging.WARNING: "\033[93m",  # yellow
-        }
-        RESET = "\033[0m"
-
-        def format(self, record: logging.LogRecord) -> str:
-            msg = super().format(record)
-            color = self.COLORS.get(record.levelno)
-            if color:
-                return f"{color}{msg}{self.RESET}"
-            return msg
-
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(ColorFormatter("%(asctime)s [%(name)s] %(levelname)s: %(message)s"))
-    logging.basicConfig(level=log_level, handlers=[handler])
+    logging.basicConfig(
+        level=log_level,
+        format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+        stream=sys.stdout,
+    )
 
 
     # Log versions
@@ -396,7 +382,7 @@ def main() -> None:
         card_js = Path("/app/bundle/custom_components/meteo_ua/frontend/meteo-ua-weather-forecast-card.js")
         if card_js.exists():
             import re
-            m = re.search(r'"version":"([^"]+)"', card_js.read_text(encoding="utf-8")[:5000])
+            m = re.search(r'"name":"meteo-ua-weather-forecast-card","version":"([^"]+)"', card_js.read_text(encoding="utf-8"))
             if m:
                 card_version = m.group(1)
     except Exception:
