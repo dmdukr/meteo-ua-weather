@@ -51,12 +51,26 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     Removes integration from custom_components/ and notifies user.
     Card JS lives inside the integration dir, so it's removed together.
     """
+    # Remove Lovelace resource
+    card_url = "/meteo_ua/meteo-ua-weather-forecast-card.js"
+    try:
+        from homeassistant.components.lovelace import DOMAIN as LOVELACE_DOMAIN
+        lovelace_data = hass.data.get(LOVELACE_DOMAIN)
+        if lovelace_data and hasattr(lovelace_data, "resources"):
+            resources = lovelace_data.resources
+            for item in resources.async_items():
+                if card_url in item.get("url", ""):
+                    await resources.async_delete_item(item["id"])
+                    _LOGGER.info("Removed Lovelace resource: %s", card_url)
+                    break
+    except Exception as exc:
+        _LOGGER.warning("Failed to remove Lovelace resource: %s", exc)
+
     # Remove legacy card from www/ if exists
     legacy_card = Path(hass.config.path("www/meteo-ua-weather-forecast-card.js"))
     if legacy_card.exists():
         try:
             legacy_card.unlink()
-            _LOGGER.info("Removed legacy card: %s", legacy_card)
         except OSError:
             pass
 
@@ -83,24 +97,57 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 
 async def _register_card(hass: HomeAssistant) -> None:
-    """Register the Lovelace card JS as a frontend module."""
+    """Register the Lovelace card JS as a Lovelace resource."""
     if hass.data.get(DOMAIN, {}).get("_card_registered"):
         return
 
     from homeassistant.components.http import StaticPathConfig
-    from homeassistant.components.frontend import add_extra_js_url
 
     frontend_dir = Path(__file__).parent / "frontend"
-    cards = {
-        "/meteo_ua/meteo-ua-weather-forecast-card.js": "meteo-ua-weather-forecast-card.js",
-    }
+    card_url = "/meteo_ua/meteo-ua-weather-forecast-card.js"
+    card_file = "meteo-ua-weather-forecast-card.js"
 
+    # Register static path so the JS file is served by HA
     await hass.http.async_register_static_paths([
-        StaticPathConfig(url_path=url, path=str(frontend_dir / filename), cache_headers=True)
-        for url, filename in cards.items()
+        StaticPathConfig(
+            url_path=card_url,
+            path=str(frontend_dir / card_file),
+            cache_headers=True,
+        )
     ])
-    for url in cards:
-        add_extra_js_url(hass, url)
+
+    # Register as Lovelace resource (appears in Settings → Dashboards → Resources)
+    try:
+        from homeassistant.components.lovelace import (
+            DOMAIN as LOVELACE_DOMAIN,
+        )
+        from homeassistant.components.lovelace.resources import (
+            ResourceStorageCollection,
+        )
+
+        lovelace_data = hass.data.get(LOVELACE_DOMAIN)
+        if lovelace_data and hasattr(lovelace_data, "resources"):
+            resources: ResourceStorageCollection = lovelace_data.resources
+            # Check if already registered
+            existing = [
+                r for r in resources.async_items()
+                if card_url in r.get("url", "")
+            ]
+            if not existing:
+                await resources.async_create_item({
+                    "res_type": "module",
+                    "url": card_url,
+                })
+                _LOGGER.info("Meteo UA: registered card as Lovelace resource")
+            else:
+                _LOGGER.info("Meteo UA: card already in Lovelace resources")
+        else:
+            _LOGGER.warning("Meteo UA: Lovelace resources not available, using add_extra_js_url")
+            from homeassistant.components.frontend import add_extra_js_url
+            add_extra_js_url(hass, card_url)
+    except Exception as exc:
+        _LOGGER.warning("Meteo UA: failed to register Lovelace resource (%s), using add_extra_js_url", exc)
+        from homeassistant.components.frontend import add_extra_js_url
+        add_extra_js_url(hass, card_url)
 
     hass.data.setdefault(DOMAIN, {})["_card_registered"] = True
-    _LOGGER.info("Meteo UA: registered %d frontend cards", len(cards))
