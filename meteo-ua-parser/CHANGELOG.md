@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.23.0
+
+**Addon** v0.23.0 | **Integration** v1.6.0 | **Card** v1.1.0
+
+- Colored logs in Supervisor UI (green INFO, yellow WARNING, red ERROR)
+- Fixed card version detection in startup log
+- Removed auto-restart — only notifications
+
+## 0.22.0
+
+**Addon** v0.22.0 | **Integration** v1.6.0 | **Card** v1.1.0
+
+- Fixed card version showing as "?" in startup log
+
 ## 0.21.0
 
 **Addon** v0.21.0 | **Integration** v1.6.0 | **Card** v1.1.0
