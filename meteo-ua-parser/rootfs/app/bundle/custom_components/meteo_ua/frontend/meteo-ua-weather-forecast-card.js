@@ -541,9 +541,11 @@ let t,e;function i(t,e,i,r){Object.defineProperty(t,e,{get:i,set:r,enumerable:!0
       filter:
         drop-shadow(0 0 2px rgba(0, 0, 0, 0.4))
         drop-shadow(0 0 4px rgba(0, 0, 0, 0.15));
+      overflow: visible;
     }
     .mg-icon svg {
       display: block;
+      overflow: visible;
     }
     .mg-date {
       font-size: 0.65em;
@@ -587,7 +589,7 @@ let t,e;function i(t,e,i,r){Object.defineProperty(t,e,{get:i,set:r,enumerable:!0
             @click=${s?()=>this._onDayClick(a):void 0}
           >
             <div class="mg-date">${c}</div>
-            <div class="mg-icon">${lQ(function(t,e=30){let i=l0[t];if(!i)return"";let[r,a,s]=i,o=Math.random().toString(36).slice(2,7),n=r.replace(/id="SVG/g,`id="SVG${o}`).replace(/href="#SVG/g,`href="#SVG${o}`).replace(/url\(#SVG/g,`url(#SVG${o}`);return n=(n=n.replace(/begin="([^"]*?);\s*[xyts]\d+\.end[^"]*"/g,'begin="$1" repeatCount="indefinite"')).replace(/begin="[^"]*[xyts]\d+\.end[^"]*"/g,'begin="0s" repeatCount="indefinite"'),`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${a} ${s}" width="${e}" height="${e}">${n}</svg>`}(d,r?22:32))}</div>
+            <div class="mg-icon">${lQ(function(t,e=30){let i=l0[t];if(!i)return"";let[r,a,s]=i,o=Math.random().toString(36).slice(2,7),n=r.replace(/id="SVG/g,`id="SVG${o}`).replace(/href="#SVG/g,`href="#SVG${o}`).replace(/url\(#SVG/g,`url(#SVG${o}`);n=(n=(n=(n=(n=(n=n.replace(/begin="([^"]*?);\s*[xyts]\d+\.end[^"]*"/g,'begin="$1" repeatCount="indefinite"')).replace(/begin="[^"]*[xyts]\d+\.end[^"]*"/g,'begin="0s" repeatCount="indefinite"')).replace(/stop-color="#0b65ed"/g,'stop-color="#e0e8ff"')).replace(/stop-color="#0a5ad4"/g,'stop-color="#c8d8f8"')).replace(/stop-color="#0950bc"/g,'stop-color="#b0c8f0"')).replace(/stroke="#0a5ad4"/g,'stroke="#d0d8e8"');let l=["rainy","pouring","snowy","snowy-rainy","hail","lightning-rainy"].includes(t);return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${a} ${l?1.15*s:s}" width="${e}" height="${l?1.3*e:e}">${n}</svg>`}(d,r?22:32))}</div>
             <div class="mg-temp">${p}</div>
             ${i&&g?eW`<div class="mg-wind">${g}</div>`:eZ}
           </div>
