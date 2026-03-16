@@ -360,11 +360,34 @@ def main() -> None:
     options = load_options()
     log_level = getattr(logging, options.get("log_level", "info").upper(), logging.INFO)
 
-    logging.basicConfig(
-        level=log_level,
-        format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
-        stream=sys.stdout,
-    )
+    class _ColorFormatter(logging.Formatter):
+        _TIME_COLORS = {
+            logging.DEBUG:    "\033[32m",   # green
+            logging.INFO:     "\033[32m",   # green
+            logging.WARNING:  "\033[33m",   # yellow
+            logging.ERROR:    "\033[31m",   # red
+            logging.CRITICAL: "\033[31m",   # red
+        }
+        _RESET  = "\033[0m"
+        _WHITE  = "\033[97m"
+        _CYAN   = "\033[96m"
+
+        def format(self, record):
+            time_color = self._TIME_COLORS.get(record.levelno, "\033[32m")
+            ts = self.formatTime(record, "%Y-%m-%d %H:%M:%S")
+            ms = int(record.msecs)
+            level = record.levelname
+            name = record.name
+            msg = record.getMessage()
+            return (
+                f"{time_color}{ts},{ms:03d}{self._RESET} "
+                f"{time_color}[{name}] {level}{self._RESET}: "
+                f"{self._WHITE}{msg}{self._RESET}"
+            )
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(_ColorFormatter())
+    logging.basicConfig(level=log_level, handlers=[handler])
 
 
     # Log versions
