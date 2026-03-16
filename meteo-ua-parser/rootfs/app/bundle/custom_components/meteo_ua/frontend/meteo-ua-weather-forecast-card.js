@@ -561,6 +561,21 @@ let t,e;function i(t,e,i,r){Object.defineProperty(t,e,{get:i,set:r,enumerable:!0
       color: rgba(255, 255, 255, 0.8);
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     }
+
+    /* Light background — dark text/icons */
+    .mg-label-cell.light-bg .mg-date { color: rgba(0, 0, 0, 0.6); }
+    .mg-label-cell.light-bg .mg-icon ha-icon {
+      color: rgba(0, 0, 0, 0.7);
+      filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.3));
+    }
+    .mg-label-cell.light-bg .mg-temp {
+      color: rgba(0, 0, 0, 0.85);
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
+    }
+    .mg-label-cell.light-bg .mg-wind {
+      color: rgba(0, 0, 0, 0.55);
+      text-shadow: none;
+    }
   `}updated(t){super.updated(t),this.dailyForecast?.length&&requestAnimationFrame(()=>this._updateWaveMasks())}_updateWaveMasks(){this.renderRoot.querySelectorAll(".mg-row-wrapper").forEach(t=>{let e=t.getBoundingClientRect();if(0===e.width)return;let i=t.querySelectorAll(".mg-day"),r=t.querySelector(".mg-wave-svg");if(!r)return;let s=r.querySelector("mask");if(s){for(;s.firstChild;)s.removeChild(s.firstChild);i.forEach(t=>{let i=t.getBoundingClientRect(),r=(i.left-e.left)/e.width*100,a=(i.top-e.top)/e.height*100,o=i.width/e.width*100,n=i.height/e.height*100,l=document.createElementNS("http://www.w3.org/2000/svg","rect");l.setAttribute("x",`${r}`),l.setAttribute("y",`${a}`),l.setAttribute("width",`${o}`),l.setAttribute("height",`${n}`),l.setAttribute("rx","1.5"),l.setAttribute("fill","white"),s.appendChild(l)})}})}render(){if(!this.config||!this.dailyForecast?.length)return eG;let t=this.config.monthly_grid;if(t?.show===!1)return eG;let e=t?.columns||6,i=t?.show_wind!==!1,r=t?.compact||!1,s=t?.show_chart!==!1;r?this.setAttribute("compact",""):this.removeAttribute("compact");let a=this.hass?.language||"uk",o="uk"===a||"ru"===a?"uk-UA":"en-US",n="uk"===a||"ru"===a?"м/с":"m/s",l=new Set;if(this.hourlyForecast)for(let t of this.hourlyForecast)t.datetime&&l.add(new Date(t.datetime).toISOString().split("T")[0]);let h=new Date().toISOString().split("T")[0],c=this.dailyForecast.map(t=>t.temperature).filter(t=>null!=t),d=Math.min(...c),u=Math.max(...c),p=[];for(let t=0;t<this.dailyForecast.length;t+=e)p.push(this.dailyForecast.slice(t,t+e));return eq`${p.map((t,r)=>{let a=t.length,c=t.map((t,e)=>({x:(e+.5)/a*100,y:100-((t.temperature??d)-d)/(u-d||1)*60-20}));if(c.length>0){let t=c[0],e=c[c.length-1];c.unshift({x:0,y:t.y}),c.push({x:100,y:e.y})}let p=function(t){if(t.length<2)return"";let e=[`M ${t[0].x} ${t[0].y}`];for(let i=0;i<t.length-1;i++){let r=t[Math.max(0,i-1)],s=t[i],a=t[i+1],o=t[Math.min(t.length-1,i+2)],n=s.x+(a.x-r.x)*.5/3,l=s.y+(a.y-r.y)*.5/3,h=a.x-(o.x-s.x)*.5/3,c=a.y-(o.y-s.y)*.5/3;e.push(`C ${n} ${l}, ${h} ${c}, ${a.x} ${a.y}`)}return e.join(" ")}(c),f=`${p} L 100 100 L 0 100 Z`,g=`wg-${r}-${Math.random().toString(36).slice(2,6)}`,m=`wm-${g}`,y=[t[0]?.temperature??d,...t.map(t=>t.temperature??d),t[t.length-1]?.temperature??d],b=c.map((t,e)=>{var i;return eX`<stop offset="${t.x}%" stop-color="${(i=y[e])<=-10?"#4fb3ff":i<=0?"#2196f3":i<=8?"#8bc34a":i<=18?"#ffeb3b":i<=26?"#ff9800":"#f44336"}" />`}),_=t.map((t,e)=>eX`<rect x="${e/a*100+.5}" y="0"
               width="${1/a*100-1}" height="100"
               rx="1.5" fill="white" />`),v=s?eq`
@@ -576,15 +591,15 @@ let t,e;function i(t,e,i,r){Object.defineProperty(t,e,{get:i,set:r,enumerable:!0
             class="mg-day ${s?"clickable":""} ${a?"selected":""}"
             style="background: ${o}"
           ></div>
-        `}),w=t.map(t=>{let e=t.datetime?new Date(t.datetime):new Date,r=e.toISOString().split("T")[0],s=l.has(r)||r===h,a=e.toLocaleDateString(o,{day:"numeric",month:"short"}),c=t.condition||"",d=`mdi:weather-${c.replace(/_/g,"-")}`,u=null!=t.temperature?`${t.temperature>0?"+":""}${Math.round(t.temperature)}\xb0`:"",p=null!=t.templow?`${t.templow>0?"+":""}${Math.round(t.templow)}\xb0`:"",f=p?`${p}..${u}`:u,g=null!=t.wind_speed?`${t.wind_speed.toFixed(1)} ${n}`:"";return eq`
+        `}),w=t.map(t=>{var e;let r=t.datetime?new Date(t.datetime):new Date,s=r.toISOString().split("T")[0],a=l.has(s)||s===h,c=(e=t.condition,new Set(["snowy","snowy-rainy","fog"]).has(e??"")),d=r.toLocaleDateString(o,{day:"numeric",month:"short"}),u=t.condition||"",p=`mdi:weather-${u.replace(/_/g,"-")}`,f=null!=t.temperature?`${t.temperature>0?"+":""}${Math.round(t.temperature)}\xb0`:"",g=null!=t.templow?`${t.templow>0?"+":""}${Math.round(t.templow)}\xb0`:"",m=g?`${g}..${f}`:f,y=null!=t.wind_speed?`${t.wind_speed.toFixed(1)} ${n}`:"";return eq`
           <div
-            class="mg-label-cell ${s?"clickable":""}"
-            @click=${s?()=>this._onDayClick(r):void 0}
+            class="mg-label-cell ${a?"clickable":""} ${c?"light-bg":""}"
+            @click=${a?()=>this._onDayClick(s):void 0}
           >
-            <div class="mg-date">${a}</div>
-            <div class="mg-icon"><ha-icon icon="${d}"></ha-icon></div>
-            <div class="mg-temp">${f}</div>
-            ${i&&g?eq`<div class="mg-wind">${g}</div>`:eG}
+            <div class="mg-date">${d}</div>
+            <div class="mg-icon"><ha-icon icon="${p}"></ha-icon></div>
+            <div class="mg-temp">${m}</div>
+            ${i&&y?eq`<div class="mg-wind">${y}</div>`:eG}
           </div>
         `});return eq`
         <div class="mg-row-wrapper">
