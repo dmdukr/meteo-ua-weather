@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import shutil
 from pathlib import Path
 
 from homeassistant.config_entries import ConfigEntry
@@ -15,6 +16,9 @@ from .coordinator import MeteoUaCoordinator
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS_LIST = [Platform.WEATHER]
+
+ADDON_SLUG = "05f6fddb_meteo_ua_parser"
+CARD_WWW_PATH = "www/meteo-ua-weather-forecast-card.js"
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -40,6 +44,34 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if ok:
         hass.data[DOMAIN].pop(entry.entry_id)
     return ok
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Called when the last config entry is removed via UI.
+
+    Cleans up card JS from www/ and notifies user to restart HA.
+    Does NOT remove custom_components/meteo_ua/ (HA handles that via HACS or addon).
+    """
+    # Remove card from www/
+    card_path = Path(hass.config.path(CARD_WWW_PATH))
+    if card_path.exists():
+        try:
+            card_path.unlink()
+            _LOGGER.info("Removed card: %s", card_path)
+        except OSError as exc:
+            _LOGGER.warning("Failed to remove card: %s", exc)
+
+    # Notify user about restart
+    from homeassistant.components.persistent_notification import async_create
+    async_create(
+        hass,
+        "Інтеграцію Meteo UA Weather видалено. "
+        "Перезавантажте Home Assistant для завершення.\n\n"
+        "Meteo UA Weather integration removed. "
+        "Restart Home Assistant to complete removal.",
+        title="Meteo UA Weather",
+        notification_id="meteo_ua_removed",
+    )
 
 
 async def _register_card(hass: HomeAssistant) -> None:
