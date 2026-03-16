@@ -243,6 +243,13 @@ async def handle_uninstall(request: web.Request) -> web.Response:
     return web.json_response({"status": "ok", "message": "Integration and card removed"})
 
 
+async def handle_test_notify(request: web.Request) -> web.Response:
+    """Test notification delivery."""
+    _LOGGER.info("Test notification requested")
+    _notify_restart("Тестове повідомлення від Meteo UA Parser. / Test notification from Meteo UA Parser.")
+    return web.json_response({"status": "ok", "message": "Test notification sent"})
+
+
 def _notify_restart(message: str | None = None) -> None:
     """Send persistent notification via Supervisor API."""
     import urllib.request
@@ -281,9 +288,6 @@ def _notify_restart(message: str | None = None) -> None:
     except Exception as exc:
         _LOGGER.warning("Failed to send notification: %s", exc)
 
-    # Also log SUPERVISOR_TOKEN presence for debugging
-    _LOGGER.info("SUPERVISOR_TOKEN present: %s, length: %d",
-                 bool(supervisor_token), len(supervisor_token))
 
 
 def main() -> None:
@@ -295,17 +299,15 @@ def main() -> None:
         stream=sys.stdout,
     )
 
-    # Debug: log environment for troubleshooting
-    supervisor_token = os.environ.get("SUPERVISOR_TOKEN", "")
-    _LOGGER.info("SUPERVISOR_TOKEN present: %s, length: %d", bool(supervisor_token), len(supervisor_token))
-    _LOGGER.info("HASSIO_TOKEN present: %s", bool(os.environ.get("HASSIO_TOKEN", "")))
 
     # Install/update integration and card on startup
     _LOGGER.info("Checking integration and card installation...")
-    needs_restart = install_all()
-    if needs_restart:
-        _LOGGER.info("Integration/card installed or updated — requesting HA restart")
+    changed = install_all()
+    if changed:
+        _LOGGER.info("Integration/card installed or updated — sending restart notification")
         _notify_restart()
+    else:
+        _LOGGER.info("Integration and card up to date — no restart needed")
 
     app = web.Application()
     app.router.add_get("/api/health", handle_health)
@@ -314,6 +316,7 @@ def main() -> None:
     app.router.add_get("/api/daily/{city_id}/{city_slug}", handle_daily)
     app.router.add_post("/api/refresh", handle_refresh)
     app.router.add_post("/api/uninstall", handle_uninstall)
+    app.router.add_post("/api/test-notify", handle_test_notify)
 
     app.on_startup.append(start_scheduler)
     app.on_cleanup.append(stop_scheduler)
