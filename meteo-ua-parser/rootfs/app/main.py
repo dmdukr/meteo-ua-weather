@@ -381,6 +381,31 @@ def main() -> None:
     logging.basicConfig(level=log_level, handlers=[handler])
 
 
+    # Log versions
+    addon_version = os.environ.get("BUILD_VERSION", "?")
+    integration_version = "?"
+    card_version = "?"
+    try:
+        import json as _json
+        manifest = _json.loads(Path("/app/bundle/custom_components/meteo_ua/manifest.json").read_text())
+        integration_version = manifest.get("version", "?")
+    except Exception:
+        pass
+    try:
+        # Card version is embedded in the JS bundle
+        card_js = Path("/app/bundle/custom_components/meteo_ua/frontend/meteo-ua-weather-forecast-card.js")
+        if card_js.exists():
+            import re
+            m = re.search(r'"version":"([^"]+)"', card_js.read_text(encoding="utf-8")[:5000])
+            if m:
+                card_version = m.group(1)
+    except Exception:
+        pass
+    _LOGGER.info(
+        "Meteo UA Weather — addon v%s, integration v%s, card v%s",
+        addon_version, integration_version, card_version,
+    )
+
     # Install/update integration and card on startup
     _LOGGER.info("Checking integration and card installation...")
     changes = install_all()

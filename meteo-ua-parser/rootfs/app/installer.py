@@ -104,7 +104,7 @@ def install_integration() -> dict[str, bool]:
             if src_v != dst_v:
                 _LOGGER.info("Updating integration v%s → v%s", dst_v, src_v)
             else:
-                _LOGGER.info("Updating integration v%s (files changed)", src_v)
+                _LOGGER.info("Updating integration v%s (addon updated, files changed)", src_v)
     except Exception:
         pass
 
