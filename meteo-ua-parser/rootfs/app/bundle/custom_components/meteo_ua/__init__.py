@@ -49,8 +49,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Called when the last config entry is removed via UI.
 
-    Cleans up card JS from www/ and notifies user to restart HA.
-    Does NOT remove custom_components/meteo_ua/ (HA handles that via HACS or addon).
+    Cleans up card JS from www/ and integration from custom_components/.
+    Notifies user to restart HA.
     """
     # Remove card from www/
     card_path = Path(hass.config.path(CARD_WWW_PATH))
@@ -61,14 +61,23 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
         except OSError as exc:
             _LOGGER.warning("Failed to remove card: %s", exc)
 
+    # Remove integration from custom_components/
+    integration_path = Path(__file__).parent  # custom_components/meteo_ua/
+    if integration_path.exists():
+        try:
+            shutil.rmtree(integration_path)
+            _LOGGER.info("Removed integration: %s", integration_path)
+        except OSError as exc:
+            _LOGGER.warning("Failed to remove integration: %s", exc)
+
     # Notify user about restart
     from homeassistant.components.persistent_notification import async_create
     async_create(
         hass,
-        "Інтеграцію Meteo UA Weather видалено. "
-        "Перезавантажте Home Assistant для завершення.\n\n"
-        "Meteo UA Weather integration removed. "
-        "Restart Home Assistant to complete removal.",
+        "Інтеграцію Meteo UA Weather та карточку видалено. "
+        "**[Перезавантажте Home Assistant](/developer-tools/yaml)** для завершення.\n\n"
+        "Meteo UA Weather integration and card removed. "
+        "**[Restart Home Assistant](/developer-tools/yaml)** to complete removal.",
         title="Meteo UA Weather",
         notification_id="meteo_ua_removed",
     )
