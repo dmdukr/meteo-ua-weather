@@ -1,6 +1,9 @@
-"""Install/uninstall integration and card files to HA config directory."""
+"""Install/uninstall integration files to HA config directory.
+
+Card JS is bundled inside the integration (frontend/) and registered
+via add_extra_js_url in __init__.py — no separate www/ copy needed.
+"""
 import logging
-import os
 import shutil
 from pathlib import Path
 
@@ -12,22 +15,17 @@ CONFIG_DIR = Path("/config")
 INTEGRATION_SRC = BUNDLE_DIR / "custom_components" / "meteo_ua"
 INTEGRATION_DST = CONFIG_DIR / "custom_components" / "meteo_ua"
 
-CARD_SRC = BUNDLE_DIR / "www" / "meteo-ua-weather-forecast-card.js"
-CARD_DST = CONFIG_DIR / "www" / "meteo-ua-weather-forecast-card.js"
+# Legacy card location — clean up if exists
+LEGACY_CARD = CONFIG_DIR / "www" / "meteo-ua-weather-forecast-card.js"
 
 
 def is_integration_installed() -> bool:
     return INTEGRATION_DST.exists() and (INTEGRATION_DST / "manifest.json").exists()
 
 
-def is_card_installed() -> bool:
-    return CARD_DST.exists()
-
-
 def install_integration() -> bool:
     """Copy integration files to custom_components. Returns True if installed."""
     if is_integration_installed():
-        # Check version — update if bundle is newer
         try:
             import json
             installed = json.loads((INTEGRATION_DST / "manifest.json").read_text())
@@ -47,20 +45,6 @@ def install_integration() -> bool:
     return True
 
 
-def install_card() -> bool:
-    """Copy card JS to www/. Returns True if installed."""
-    if is_card_installed():
-        # Check size — update if different
-        if CARD_DST.stat().st_size == CARD_SRC.stat().st_size:
-            _LOGGER.info("Card already installed")
-            return False
-
-    _LOGGER.info("Installing card to %s", CARD_DST)
-    CARD_DST.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(CARD_SRC, CARD_DST)
-    return True
-
-
 def uninstall_integration() -> None:
     """Remove integration files."""
     if INTEGRATION_DST.exists():
@@ -68,30 +52,28 @@ def uninstall_integration() -> None:
         shutil.rmtree(INTEGRATION_DST)
 
 
-def uninstall_card() -> None:
-    """Remove card JS."""
-    if CARD_DST.exists():
-        _LOGGER.info("Removing card from %s", CARD_DST)
-        CARD_DST.unlink()
+def _cleanup_legacy_card() -> None:
+    """Remove old card copy from www/ if it exists."""
+    if LEGACY_CARD.exists():
+        try:
+            LEGACY_CARD.unlink()
+            _LOGGER.info("Removed legacy card from %s", LEGACY_CARD)
+        except OSError as exc:
+            _LOGGER.warning("Failed to remove legacy card: %s", exc)
 
 
 def install_all() -> bool:
-    """Install integration + card. Returns True if anything was installed/updated."""
-    changed = False
+    """Install integration. Returns True if anything was installed/updated."""
+    _cleanup_legacy_card()
+
     if INTEGRATION_SRC.exists():
-        changed |= install_integration()
-    else:
-        _LOGGER.warning("Integration bundle not found at %s", INTEGRATION_SRC)
+        return install_integration()
 
-    if CARD_SRC.exists():
-        changed |= install_card()
-    else:
-        _LOGGER.warning("Card bundle not found at %s", CARD_SRC)
-
-    return changed
+    _LOGGER.warning("Integration bundle not found at %s", INTEGRATION_SRC)
+    return False
 
 
 def uninstall_all() -> None:
-    """Remove integration + card."""
+    """Remove integration + legacy card."""
     uninstall_integration()
-    uninstall_card()
+    _cleanup_legacy_card()

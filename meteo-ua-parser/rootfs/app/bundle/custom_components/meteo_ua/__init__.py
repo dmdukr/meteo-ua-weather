@@ -18,7 +18,6 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS_LIST = [Platform.WEATHER]
 
 ADDON_SLUG = "05f6fddb_meteo_ua_parser"
-CARD_WWW_PATH = "www/meteo-ua-weather-forecast-card.js"
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -49,17 +48,17 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Called when the last config entry is removed via UI.
 
-    Cleans up card JS from www/ and integration from custom_components/.
-    Notifies user to restart HA.
+    Removes integration from custom_components/ and notifies user.
+    Card JS lives inside the integration dir, so it's removed together.
     """
-    # Remove card from www/
-    card_path = Path(hass.config.path(CARD_WWW_PATH))
-    if card_path.exists():
+    # Remove legacy card from www/ if exists
+    legacy_card = Path(hass.config.path("www/meteo-ua-weather-forecast-card.js"))
+    if legacy_card.exists():
         try:
-            card_path.unlink()
-            _LOGGER.info("Removed card: %s", card_path)
-        except OSError as exc:
-            _LOGGER.warning("Failed to remove card: %s", exc)
+            legacy_card.unlink()
+            _LOGGER.info("Removed legacy card: %s", legacy_card)
+        except OSError:
+            pass
 
     # Remove integration from custom_components/
     integration_path = Path(__file__).parent  # custom_components/meteo_ua/
@@ -74,9 +73,9 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     from homeassistant.components.persistent_notification import async_create
     async_create(
         hass,
-        "Інтеграцію Meteo UA Weather та карточку видалено. "
+        "Інтеграцію Meteo UA Weather видалено. "
         "**[Перезавантажте Home Assistant](/developer-tools/yaml)** для завершення.\n\n"
-        "Meteo UA Weather integration and card removed. "
+        "Meteo UA Weather integration removed. "
         "**[Restart Home Assistant](/developer-tools/yaml)** to complete removal.",
         title="Meteo UA Weather",
         notification_id="meteo_ua_removed",
