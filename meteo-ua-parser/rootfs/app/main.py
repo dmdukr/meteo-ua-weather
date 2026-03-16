@@ -376,6 +376,7 @@ def _request_ha_restart() -> None:
 
     supervisor_token = os.environ.get("SUPERVISOR_TOKEN", "")
     if not supervisor_token:
+        _LOGGER.warning("No SUPERVISOR_TOKEN — cannot restart HA")
         return
 
     headers = {
@@ -383,34 +384,39 @@ def _request_ha_restart() -> None:
         "Content-Type": "application/json",
     }
 
-    # Try multiple endpoints — permissions vary by addon config
-    endpoints = [
-        "http://supervisor/homeassistant/restart",
-        "http://supervisor/core/restart",
-    ]
-
-    for url in endpoints:
-        try:
-            req = urllib.request.Request(
-                url, data=b"", headers=headers, method="POST",
-            )
-            urllib.request.urlopen(req, timeout=30)
-            _LOGGER.info("HA Core restart requested via %s", url)
-            return
-        except Exception as exc:
-            _LOGGER.info("Restart via %s failed: %s", url, exc)
-
-    _LOGGER.warning("Could not restart HA — user must restart manually")
+    url = "http://supervisor/core/restart"
+    try:
+        req = urllib.request.Request(url, data=b"{}", headers=headers, method="POST")
+        resp = urllib.request.urlopen(req, timeout=60)
+        _LOGGER.info("HA Core restart requested successfully (status: %s)", resp.status)
+    except Exception as exc:
+        _LOGGER.warning("Failed to restart HA via %s: %s", url, exc)
+        _LOGGER.info("User must restart HA manually")
 
 
 def main() -> None:
     options = load_options()
     log_level = getattr(logging, options.get("log_level", "info").upper(), logging.INFO)
-    logging.basicConfig(
-        level=log_level,
-        format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
-        stream=sys.stdout,
-    )
+
+    class ColorFormatter(logging.Formatter):
+        """Color log output — errors red, warnings yellow."""
+        COLORS = {
+            logging.ERROR: "\033[91m",    # red
+            logging.CRITICAL: "\033[91m", # red
+            logging.WARNING: "\033[93m",  # yellow
+        }
+        RESET = "\033[0m"
+
+        def format(self, record: logging.LogRecord) -> str:
+            msg = super().format(record)
+            color = self.COLORS.get(record.levelno)
+            if color:
+                return f"{color}{msg}{self.RESET}"
+            return msg
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(ColorFormatter("%(asctime)s [%(name)s] %(levelname)s: %(message)s"))
+    logging.basicConfig(level=log_level, handlers=[handler])
 
 
     # Install/update integration and card on startup

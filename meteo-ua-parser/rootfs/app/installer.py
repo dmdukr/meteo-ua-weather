@@ -1,13 +1,15 @@
 """Install/uninstall integration files to HA config directory.
 
 Card JS is bundled inside the integration (frontend/) and registered
-via add_extra_js_url in __init__.py — no separate www/ copy needed.
+via Lovelace resources in __init__.py — no separate www/ copy needed.
 """
+import hashlib
+import json
 import logging
 import shutil
 from pathlib import Path
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger("installer")
 
 BUNDLE_DIR = Path("/app/bundle")
 CONFIG_DIR = Path("/config")
@@ -19,23 +21,41 @@ INTEGRATION_DST = CONFIG_DIR / "custom_components" / "meteo_ua"
 LEGACY_CARD = CONFIG_DIR / "www" / "meteo-ua-weather-forecast-card.js"
 
 
+def _dir_hash(path: Path) -> str:
+    """Calculate a quick hash of all files in a directory."""
+    h = hashlib.md5()
+    if not path.exists():
+        return ""
+    for f in sorted(path.rglob("*")):
+        if f.is_file() and "__pycache__" not in str(f):
+            h.update(f.read_bytes())
+    return h.hexdigest()
+
+
 def is_integration_installed() -> bool:
     return INTEGRATION_DST.exists() and (INTEGRATION_DST / "manifest.json").exists()
 
 
 def install_integration() -> bool:
-    """Copy integration files to custom_components. Returns True if installed."""
+    """Copy integration files to custom_components. Returns True if installed/updated."""
     if is_integration_installed():
+        # Compare content hashes — catches any file change, not just version bump
+        src_hash = _dir_hash(INTEGRATION_SRC)
+        dst_hash = _dir_hash(INTEGRATION_DST)
+        if src_hash == dst_hash:
+            try:
+                v = json.loads((INTEGRATION_DST / "manifest.json").read_text()).get("version", "?")
+                _LOGGER.info("Integration already installed and up to date (v%s)", v)
+            except Exception:
+                _LOGGER.info("Integration already installed and up to date")
+            return False
+        # Files differ — update
         try:
-            import json
-            installed = json.loads((INTEGRATION_DST / "manifest.json").read_text())
-            bundled = json.loads((INTEGRATION_SRC / "manifest.json").read_text())
-            if installed.get("version") == bundled.get("version"):
-                _LOGGER.info("Integration already installed (v%s)", installed.get("version"))
-                return False
-            _LOGGER.info("Updating integration %s → %s", installed.get("version"), bundled.get("version"))
+            src_v = json.loads((INTEGRATION_SRC / "manifest.json").read_text()).get("version", "?")
+            dst_v = json.loads((INTEGRATION_DST / "manifest.json").read_text()).get("version", "?")
+            _LOGGER.info("Updating integration v%s → v%s", dst_v, src_v)
         except Exception:
-            pass
+            _LOGGER.info("Updating integration (files changed)")
 
     _LOGGER.info("Installing integration to %s", INTEGRATION_DST)
     INTEGRATION_DST.parent.mkdir(parents=True, exist_ok=True)

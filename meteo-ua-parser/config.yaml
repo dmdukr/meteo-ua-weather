@@ -1,15 +1,13 @@
-name: "Meteo UA Parser"
+name: "Meteo UA Weather"
 description: >-
   Погода з meteo.ua для Home Assistant.
   При першому запуску автоматично встановить інтеграцію Meteo UA Weather
-  та карточку прогнозу погоди. Після встановлення потрібне перезавантаження HA.
-  Перед видаленням аддону видаліть інтеграцію через Налаштування → Інтеграції.
+  та карточку прогнозу погоди. Після встановлення HA перезавантажиться автоматично.
   /
   Weather from meteo.ua for Home Assistant.
   On first start automatically installs Meteo UA Weather integration and
-  forecast card. HA restart required after installation.
-  Before removing the add-on, remove the integration via Settings → Integrations.
-version: "0.16.0"
+  forecast card. HA restarts automatically after installation.
+version: "0.18.0"
 slug: "meteo_ua_parser"
 url: "https://github.com/dmdukr/ha-addon-meteo-ua-parser"
 arch:
@@ -29,4 +27,5 @@ init: false
 map:
   - config:rw
 homeassistant_api: true
+hassio_api: true
 hassio_role: "manager"
