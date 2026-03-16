@@ -560,19 +560,19 @@ let t,e;function i(t,e,i,r){Object.defineProperty(t,e,{get:i,set:r,enumerable:!0
       font-weight: bold;
     }
     .mg-temp.on-blue {
-      color: #4fc3f7;
+      color: #fff;
       text-shadow: 0 1px 3px rgba(0,0,0,0.7), 0 0 6px rgba(0,0,0,0.3);
     }
     .mg-temp.on-yellow {
-      color: #1565c0;
+      color: #1a237e;
       text-shadow: 0 1px 2px rgba(255,255,255,0.3);
     }
     .mg-temp.on-green {
-      color: #ffd54f;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
     }
     .mg-temp.on-orange {
-      color: #4a2800;
+      color: #3e2723;
       text-shadow: 0 1px 2px rgba(255,255,255,0.3);
     }
     .mg-temp.on-red {
@@ -582,11 +582,11 @@ let t,e;function i(t,e,i,r){Object.defineProperty(t,e,{get:i,set:r,enumerable:!0
     .mg-wind {
       font-size: 0.6em;
     }
-    .mg-wind.on-blue { color: rgba(200,220,240,0.85); text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
-    .mg-wind.on-yellow { color: rgba(20,50,120,0.7); text-shadow: none; }
-    .mg-wind.on-green { color: rgba(200,190,100,0.85); text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
-    .mg-wind.on-orange { color: rgba(80,40,0,0.7); text-shadow: none; }
-    .mg-wind.on-red { color: rgba(255,220,220,0.85); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+    .mg-wind.on-blue { color: rgba(255,255,255,0.75); text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+    .mg-wind.on-yellow { color: rgba(20,30,80,0.6); text-shadow: none; }
+    .mg-wind.on-green { color: rgba(255,255,255,0.7); text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+    .mg-wind.on-orange { color: rgba(60,30,0,0.6); text-shadow: none; }
+    .mg-wind.on-red { color: rgba(255,255,255,0.75); text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
   `}updated(t){super.updated(t),this.dailyForecast?.length&&requestAnimationFrame(()=>this._updateWaveMasks())}_updateWaveMasks(){this.renderRoot.querySelectorAll(".mg-row-wrapper").forEach(t=>{let e=t.getBoundingClientRect();if(0===e.width)return;let i=t.querySelectorAll(".mg-day"),r=t.querySelector(".mg-wave-svg");if(!r)return;let a=r.querySelector("mask");if(a){for(;a.firstChild;)a.removeChild(a.firstChild);i.forEach(t=>{let i=t.getBoundingClientRect(),r=(i.left-e.left)/e.width*100,s=(i.top-e.top)/e.height*100,o=i.width/e.width*100,n=i.height/e.height*100,l=document.createElementNS("http://www.w3.org/2000/svg","rect");l.setAttribute("x",`${r}`),l.setAttribute("y",`${s}`),l.setAttribute("width",`${o}`),l.setAttribute("height",`${n}`),l.setAttribute("rx","1.5"),l.setAttribute("fill","white"),a.appendChild(l)})}})}render(){if(!this.config||!this.dailyForecast?.length)return eZ;let t=this.config.monthly_grid;if(t?.show===!1)return eZ;let e=t?.columns||6,i=t?.show_wind!==!1,r=t?.compact||!1,a=t?.show_chart!==!1;r?this.setAttribute("compact",""):this.removeAttribute("compact");let s=this.hass?.language||"uk",o="uk"===s||"ru"===s?"uk-UA":"en-US",n="uk"===s||"ru"===s?"м/с":"m/s",l=new Set;if(this.hourlyForecast)for(let t of this.hourlyForecast)t.datetime&&l.add(new Date(t.datetime).toISOString().split("T")[0]);let h=new Date().toISOString().split("T")[0],c=this.dailyForecast.map(t=>t.temperature).filter(t=>null!=t),d=Math.min(...c),u=Math.max(...c),f=[];for(let t=0;t<this.dailyForecast.length;t+=e)f.push(this.dailyForecast.slice(t,t+e));return eW`${f.map((t,s)=>{let c=t.length,f=t.map((t,e)=>({x:(e+.5)/c*100,y:100-((t.temperature??d)-d)/(u-d||1)*60-20}));if(f.length>0){let t=f[0],e=f[f.length-1];f.unshift({x:0,y:t.y}),f.push({x:100,y:e.y})}let p=function(t){if(t.length<2)return"";let e=[`M ${t[0].x} ${t[0].y}`];for(let i=0;i<t.length-1;i++){let r=t[Math.max(0,i-1)],a=t[i],s=t[i+1],o=t[Math.min(t.length-1,i+2)],n=a.x+(s.x-r.x)*.5/3,l=a.y+(s.y-r.y)*.5/3,h=s.x-(o.x-a.x)*.5/3,c=s.y-(o.y-a.y)*.5/3;e.push(`C ${n} ${l}, ${h} ${c}, ${s.x} ${s.y}`)}return e.join(" ")}(f),g=`${p} L 100 100 L 0 100 Z`,m=`wg-${s}-${Math.random().toString(36).slice(2,6)}`,y=`wm-${m}`,b=[t[0]?.temperature??d,...t.map(t=>t.temperature??d),t[t.length-1]?.temperature??d],_=f.map((t,e)=>{var i;return eY`<stop offset="${t.x}%" stop-color="${(i=b[e])<=-10?"#2196f3":i<=0?"#4fb3ff":i<=8?"#ffeb3b":i<=18?"#4caf50":i<=26?"#ff9800":"#f44336"}" />`}),v=t.map((t,e)=>eY`<rect x="${e/c*100+.5}" y="0"
               width="${1/c*100-1}" height="100"
               rx="1.5" fill="white" />`),x=a?eW`
