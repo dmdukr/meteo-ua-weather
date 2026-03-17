@@ -2,15 +2,17 @@
     "config": {
         "step": {
             "user": {
-                "title": "Meteo UA — пошук населеного пункту",
+                "title": "Meteo UA Weather",
+                "description": "Введіть назву населеного пункту для пошуку",
                 "data": {
-                    "query": "Назва населеного пункту"
+                    "query": "Населений пункт"
                 }
             },
             "select": {
-                "title": "Meteo UA — оберіть населений пункт",
+                "title": "Meteo UA Weather",
+                "description": "Оберіть населений пункт зі списку",
                 "data": {
-                    "city_name": "Населений пункт"
+                    "settlement": "Населений пункт"
                 }
             }
         },

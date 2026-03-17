@@ -9,7 +9,6 @@ UPDATE_INTERVAL_CURRENT = 1800   # 30 min
 UPDATE_INTERVAL_FORECAST = 7200  # 2 hours
 
 MONTHLY_URL = "https://meteo.ua/{city_id}/{city_slug}/month"
-AUTOCOMPLETE_URL = "https://meteo.ua/front/forecast/autocomplete?phrase={phrase}"
 
 # meteo.ua icon name -> HA weather condition
 ICON_TO_HA_CONDITION = {

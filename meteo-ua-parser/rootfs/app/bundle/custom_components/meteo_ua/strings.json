@@ -2,24 +2,26 @@
     "config": {
         "step": {
             "user": {
-                "title": "Meteo UA — пошук населеного пункту",
+                "title": "Meteo UA Weather",
+                "description": "Enter the name of a settlement to search",
                 "data": {
-                    "query": "Назва населеного пункту"
+                    "query": "Settlement name"
                 }
             },
             "select": {
-                "title": "Meteo UA — оберіть населений пункт",
+                "title": "Meteo UA Weather",
+                "description": "Select a settlement from search results",
                 "data": {
-                    "city_name": "Населений пункт"
+                    "settlement": "Settlement"
                 }
             }
         },
         "error": {
-            "too_short": "Введіть щонайменше 2 символи",
-            "no_results": "Нічого не знайдено. Спробуйте інший запит"
+            "too_short": "Enter at least 2 characters",
+            "no_results": "No results found. Try a different query"
         },
         "abort": {
-            "already_configured": "Цей населений пункт вже налаштований"
+            "already_configured": "This settlement is already configured"
         }
     }
 }
