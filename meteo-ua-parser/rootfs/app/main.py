@@ -309,9 +309,9 @@ async def handle_uninstall(request: web.Request) -> web.Response:
     uninstall_all()
     _notify_restart(
         "Інтеграцію Meteo UA Weather та карточку прогнозу видалено. "
-        "**[Перезавантажте Home Assistant](/developer-tools/yaml)** для завершення.\n\n"
+        "Перезавантажте Home Assistant (Settings → System → Restart) для завершення.\n\n"
         "Meteo UA Weather integration and forecast card removed. "
-        "**[Restart Home Assistant](/developer-tools/yaml)** to complete removal.",
+        "Restart Home Assistant (Settings → System → Restart) to complete removal.",
         notification_id="meteo_ua_removed",
     )
     return web.json_response({"status": "ok", "message": "Integration and card removed"})
@@ -423,9 +423,9 @@ def main() -> None:
         _LOGGER.info("Integration changed — notifying user to restart HA")
         _notify_restart(
             "Інтеграцію Meteo UA Weather оновлено. "
-            "**[Перезавантажте Home Assistant](/developer-tools/yaml)** для активації змін.\n\n"
+            "Перезавантажте Home Assistant (Settings → System → Restart) для активації змін.\n\n"
             "Meteo UA Weather integration updated. "
-            "**[Restart Home Assistant](/developer-tools/yaml)** to activate changes.",
+            "Restart Home Assistant (Settings → System → Restart) to activate changes.",
             notification_id="meteo_ua_restart_required",
         )
     elif changes.get("card"):
