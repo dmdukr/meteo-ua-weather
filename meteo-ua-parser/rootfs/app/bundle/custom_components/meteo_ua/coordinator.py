@@ -10,21 +10,20 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN, CONF_CITY_ID, CONF_CITY_SLUG, CONF_STATION_ID, UPDATE_INTERVAL_CURRENT
-from .parsers.meteo_gov_ua import async_fetch_current
+from .const import DOMAIN, CONF_CITY_ID, CONF_CITY_SLUG, UPDATE_INTERVAL_CURRENT
+from .parsers.meteo_ua_current import async_fetch_current_meteo_ua
 from .parsers.meteo_ua import async_fetch_monthly
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class MeteoUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
-    """Fetch current weather + 30-day forecast."""
+    """Fetch current weather + 30-day forecast from meteo.ua."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.entry = entry
         self.city_id: str = entry.data[CONF_CITY_ID]
         self.city_slug: str = entry.data[CONF_CITY_SLUG]
-        self.station_id: str = entry.data[CONF_STATION_ID]
 
         super().__init__(
             hass, _LOGGER,
@@ -40,7 +39,9 @@ class MeteoUaCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         session = async_get_clientsession(self.hass)
 
         try:
-            current = await async_fetch_current(session, self.station_id)
+            current = await async_fetch_current_meteo_ua(
+                session, self.city_id, self.city_slug,
+            )
         except Exception as exc:
             raise UpdateFailed(f"Current weather error: {exc}") from exc
 

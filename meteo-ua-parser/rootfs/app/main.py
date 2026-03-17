@@ -402,10 +402,10 @@ def main() -> None:
         pass
     try:
         # Card version is embedded in the JS bundle
-        card_js = Path("/app/bundle/custom_components/meteo_ua/frontend/meteo-ua-weather-forecast-card.js")
+        card_js = Path("/app/bundle/custom_components/meteo_ua/frontend/atmospheric-weather-card.js")
         if card_js.exists():
             import re
-            m = re.search(r'"name":"meteo-ua-weather-forecast-card","version":"([^"]+)"', card_js.read_text(encoding="utf-8"))
+            m = re.search(r'"version":"([^"]+)"', card_js.read_text(encoding="utf-8"))
             if m:
                 card_version = m.group(1)
     except Exception:

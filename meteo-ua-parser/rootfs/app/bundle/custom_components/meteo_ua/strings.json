@@ -1,37 +1,25 @@
 {
-    "issues": {
-        "restart_required": {
-            "title": "Потрібне перезавантаження",
-            "fix_flow": {
-                "step": {
-                    "confirm": {
-                        "title": "Перезавантажте Home Assistant",
-                        "description": "Інтеграцію Meteo UA Weather встановлено або оновлено. Перезавантажте Home Assistant для активації."
-                    }
-                }
-            }
-        }
-    },
     "config": {
         "step": {
             "user": {
-                "title": "Meteo UA — вибір міста",
+                "title": "Meteo UA — пошук населеного пункту",
                 "data": {
-                    "city_name": "Місто"
+                    "query": "Назва населеного пункту"
                 }
             },
-            "custom": {
-                "title": "Meteo UA — довільне місто",
+            "select": {
+                "title": "Meteo UA — оберіть населений пункт",
                 "data": {
-                    "city_id": "ID міста (число з URL meteo.ua)",
-                    "city_slug": "Slug міста (з URL)",
-                    "city_name": "Назва міста",
-                    "station_id": "Код метеостанції meteo.gov.ua"
+                    "city_name": "Населений пункт"
                 }
             }
         },
+        "error": {
+            "too_short": "Введіть щонайменше 2 символи",
+            "no_results": "Нічого не знайдено. Спробуйте інший запит"
+        },
         "abort": {
-            "already_configured": "Це місто вже налаштоване"
+            "already_configured": "Цей населений пункт вже налаштований"
         }
     }
 }

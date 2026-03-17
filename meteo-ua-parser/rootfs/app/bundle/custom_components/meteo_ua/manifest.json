@@ -1,13 +1,11 @@
 {
   "domain": "meteo_ua",
   "name": "Meteo UA Weather",
-  "codeowners": [
-    "@dmdukr"
-  ],
+  "codeowners": ["@dmdukr"],
   "config_flow": true,
   "documentation": "https://github.com/dmdukr/meteo-ua-weather",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/dmdukr/meteo-ua-weather/issues",
   "requirements": [],
-  "version": "1.30.0"
+  "version": "2.0.0"
 }
