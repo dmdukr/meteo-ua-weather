@@ -27,7 +27,7 @@ MAX_RESULTS = 30
 
 
 async def _search_settlements(session: aiohttp.ClientSession, query: str) -> list[dict]:
-    """Call meteo.ua autocomplete API and return parsed settlements."""
+    """Call meteo.ua autocomplete API (Ukrainian) and return parsed settlements."""
     url = AUTOCOMPLETE_URL.format(phrase=quote(query))
     try:
         async with session.get(
@@ -35,6 +35,8 @@ async def _search_settlements(session: aiohttp.ClientSession, query: str) -> lis
             headers={
                 "X-Requested-With": "XMLHttpRequest",
                 "User-Agent": "HomeAssistant/MeteoUA",
+                "lang": "ua",
+                "format": "json",
             },
             timeout=aiohttp.ClientTimeout(total=10),
         ) as resp:
@@ -53,7 +55,11 @@ async def _search_settlements(session: aiohttp.ClientSession, query: str) -> lis
         title = item.get("title", "")
         if not url_path or not title:
             continue
-        parts = url_path.strip("/").split("/")
+        # With lang:ua, url is "/ua/34/kiev" — strip /ua/ prefix
+        path = url_path.strip("/")
+        if path.startswith("ua/"):
+            path = path[3:]
+        parts = path.split("/")
         if len(parts) < 2 or not parts[0].isdigit():
             continue
         results.append({
