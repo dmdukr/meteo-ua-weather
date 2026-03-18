@@ -71,19 +71,36 @@ async def _register_card(hass: HomeAssistant) -> None:
         _LOGGER.error("Failed to copy card: %s", exc)
         return
 
-    # Register as Lovelace resource if not already
+    # Register as Lovelace resource via lovelace ResourceStorageCollection
     try:
-        resources = hass.data.get("lovelace", {}).get("resources")
-        if resources is not None:
-            existing = [r for r in resources.async_items() if CARD_FILENAME in r.get("url", "")]
-            if not existing:
-                await resources.async_create_item({"res_type": "module", "url": CARD_URL})
-                _LOGGER.info("Registered Lovelace resource: %s", CARD_URL)
-            else:
-                _LOGGER.debug("Lovelace resource already registered")
+        from homeassistant.components.lovelace import DOMAIN as LOVELACE_DOMAIN
+        from homeassistant.components.lovelace.resources import (
+            ResourceStorageCollection,
+        )
+
+        lovelace_data = hass.data.get(LOVELACE_DOMAIN)
+        if lovelace_data is None:
+            _LOGGER.warning("Lovelace not loaded — add card resource manually: %s", CARD_URL)
+            return
+
+        resources: ResourceStorageCollection | None = getattr(lovelace_data, "resources", None)
+        if resources is None:
+            _LOGGER.warning("Lovelace resources not available — add manually: %s", CARD_URL)
+            return
+
+        # Check if already registered
+        existing = [
+            r for r in resources.async_items()
+            if CARD_FILENAME in r.get("url", "")
+        ]
+        if not existing:
+            await resources.async_create_item({"res_type": "module", "url": CARD_URL})
+            _LOGGER.info("Registered Lovelace resource: %s", CARD_URL)
         else:
-            _LOGGER.warning("Lovelace resources not available — add card manually: %s", CARD_URL)
+            _LOGGER.debug("Lovelace resource already registered")
+    except ImportError:
+        _LOGGER.warning("Cannot import lovelace resources — add card manually: %s", CARD_URL)
     except Exception as exc:
-        _LOGGER.warning("Could not auto-register card resource: %s — add manually: %s", exc, CARD_URL)
+        _LOGGER.warning("Could not auto-register card: %s — add manually: %s", exc, CARD_URL)
 
     hass.data.setdefault(DOMAIN, {})["_card_registered"] = True

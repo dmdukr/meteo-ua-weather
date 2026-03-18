@@ -1,14 +1,16 @@
 # Changelog
 
+## 0.3.1
+
+- Fix: auto-register card in Lovelace resources via ResourceStorageCollection
+
 ## 0.3.0
 
-- Fix: card loads via Lovelace resources (www/ + auto-register)
-- Restored full forecast card with dynamic icons and temperature waves
-- Renamed card to `meteo-ua-weather-forecast-card`
-- Single weather entity (no separate sensor)
-- Single-step config flow with search + dropdown
+- Card loads via www/ + Lovelace resources
+- Full forecast card with dynamic icons and temperature waves
+- Single weather entity, single-step config flow
 - Ukrainian city autocomplete via meteo.ua API
-- Unified versioning across addon, integration, and card
+- Unified versioning
 
 ## 0.1.0
 
