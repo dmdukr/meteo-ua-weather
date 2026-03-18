@@ -1,10 +1,11 @@
 # Changelog
 
-## 0.3.4
+## 0.3.5
 
-- Added hourly forecast via HA weather API (`FORECAST_HOURLY`)
-- Parser now returns all hourly data from weatherDetailSlider
-- Weather entity supports both daily (30 days) and hourly forecast
+- Rebuilt card from TypeScript source (v1.30.0)
+- Grouped editor sections: hourly forecast, daily forecast settings
+- Hourly + Daily forecast via HA standard weather API
+- Parser returns full hourly data from weatherDetailSlider
 
 ## 0.3.0
 
