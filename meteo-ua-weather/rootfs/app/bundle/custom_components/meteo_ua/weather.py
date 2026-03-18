@@ -21,9 +21,30 @@ from .coordinator import MeteoUaCoordinator
 
 _UA_TZ = timezone(timedelta(hours=2))
 
+# All HA weather conditions for icon test
+_ALL_CONDITIONS = [
+    "sunny",
+    "clear-night",
+    "partlycloudy",
+    "cloudy",
+    "rainy",
+    "pouring",
+    "lightning",
+    "lightning-rainy",
+    "snowy",
+    "snowy-rainy",
+    "fog",
+    "hail",
+    "windy",
+    "windy-variant",
+    "exceptional",
+]
+
+# Set to True to test all icons (each day = different condition)
+_TEST_ICONS = True
+
 
 def _parse_temp(temp_str: str) -> float | None:
-    """Parse temp string like '+2', '-5', '0' to float."""
     if not temp_str:
         return None
     m = re.search(r"[+-]?\d+", temp_str.replace("\u2212", "-"))
@@ -31,7 +52,6 @@ def _parse_temp(temp_str: str) -> float | None:
 
 
 def _parse_wind_speed(wind_str: str) -> float | None:
-    """Parse wind string like '2.4 m/s' to float."""
     if not wind_str:
         return None
     m = re.search(r"[\d.]+", wind_str)
@@ -98,25 +118,42 @@ class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
 
     async def async_forecast_daily(self) -> list[Forecast]:
         """Return 30-day daily forecast in HA standard format."""
+        now = datetime.now(_UA_TZ)
+
+        if _TEST_ICONS:
+            return self._test_forecast(now)
+
+        return self._real_forecast(now)
+
+    def _real_forecast(self, now: datetime) -> list[Forecast]:
         monthly = self.coordinator.data.get("monthly", {})
         raw = monthly.get("forecast", [])
-        if not raw:
-            return []
-
-        now = datetime.now(_UA_TZ)
         result: list[Forecast] = []
-
         for i, day in enumerate(raw):
             dt = now + timedelta(days=i)
-            dt_str = dt.strftime("%Y-%m-%dT00:00:00+02:00")
-
             result.append(
                 Forecast(
-                    datetime=dt_str,
+                    datetime=dt.strftime("%Y-%m-%dT00:00:00+02:00"),
                     condition=day.get("ha_condition", "cloudy"),
                     native_temperature=_parse_temp(day.get("temp", "")),
                     native_wind_speed=_parse_wind_speed(day.get("wind", "")),
                 )
             )
+        return result
 
+    def _test_forecast(self, now: datetime) -> list[Forecast]:
+        """Generate 30 days with cycling through all HA conditions."""
+        result: list[Forecast] = []
+        for i in range(30):
+            dt = now + timedelta(days=i)
+            cond = _ALL_CONDITIONS[i % len(_ALL_CONDITIONS)]
+            temp = -10 + i * 1.5  # gradient from -10 to +33
+            result.append(
+                Forecast(
+                    datetime=dt.strftime("%Y-%m-%dT00:00:00+02:00"),
+                    condition=cond,
+                    native_temperature=round(temp, 1),
+                    native_wind_speed=round(1.0 + i * 0.3, 1),
+                )
+            )
         return result
