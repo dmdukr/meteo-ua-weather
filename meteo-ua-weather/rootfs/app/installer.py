@@ -58,8 +58,8 @@ def _detect_changes() -> dict[str, bool]:
     result = {"new_install": False, "integration": False, "card": False}
 
     # Check card JS separately
-    src_card = INTEGRATION_SRC / "frontend" / "atmospheric-weather-card.js"
-    dst_card = INTEGRATION_DST / "frontend" / "atmospheric-weather-card.js"
+    src_card = INTEGRATION_SRC / "frontend" / "meteo-ua-weather-forecast-card.js"
+    dst_card = INTEGRATION_DST / "frontend" / "meteo-ua-weather-forecast-card.js"
     if _file_hash(src_card) != _file_hash(dst_card):
         result["card"] = True
 
