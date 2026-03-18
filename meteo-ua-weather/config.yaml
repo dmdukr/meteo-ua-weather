@@ -2,11 +2,11 @@ name: "Meteo UA Weather"
 description: >-
   Погода з meteo.ua для Home Assistant.
   При першому запуску автоматично встановить інтеграцію Meteo UA Weather
-  та карточку прогнозу погоди. Після встановлення HA перезавантажиться автоматично.
+  та карточку прогнозу погоди. 
   /
   Weather from meteo.ua for Home Assistant.
   On first start automatically installs Meteo UA Weather integration and
-  forecast card. HA restarts automatically after installation.
+  forecast card.
 version: "0.1.1"
 slug: "meteo_ua_weather"
 url: "https://github.com/dmdukr/ha-addon-meteo-ua-weather"
