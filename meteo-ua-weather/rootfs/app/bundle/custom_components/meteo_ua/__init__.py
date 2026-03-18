@@ -14,7 +14,7 @@ from .coordinator import MeteoUaCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS_LIST = [Platform.WEATHER, Platform.SENSOR]
+PLATFORMS_LIST = [Platform.WEATHER]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:

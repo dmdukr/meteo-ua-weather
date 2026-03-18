@@ -1,6 +1,8 @@
 """Weather platform for Meteo UA."""
 from __future__ import annotations
 
+from typing import Any
+
 from homeassistant.components.weather import WeatherEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfPressure, UnitOfSpeed, UnitOfTemperature
@@ -20,7 +22,7 @@ async def async_setup_entry(
 
 
 class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
-    """Current weather entity from meteo.gov.ua."""
+    """Current weather + 30-day forecast in attributes."""
 
     _attr_has_entity_name = True
     _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
@@ -58,9 +60,13 @@ class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
         return self.coordinator.data.get("current", {}).get("wind_bearing")
 
     @property
-    def extra_state_attributes(self) -> dict:
+    def extra_state_attributes(self) -> dict[str, Any]:
         cur = self.coordinator.data.get("current", {})
+        monthly = self.coordinator.data.get("monthly", {})
         return {
             "condition_text": cur.get("condition_text", ""),
             "wind_direction": cur.get("wind_direction", ""),
+            "forecast": monthly.get("forecast", []),
+            "forecast_days": monthly.get("days", 0),
+            "forecast_city": monthly.get("city", ""),
         }
