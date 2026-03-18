@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.5
+## 0.2.6
 
 - Fix: card now loads via Lovelace resources (www/ + auto-register)
 - Restored full forecast card with dynamic icons and temperature waves
