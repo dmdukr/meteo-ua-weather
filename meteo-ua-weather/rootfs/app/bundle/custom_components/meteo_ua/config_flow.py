@@ -25,7 +25,10 @@ AUTOCOMPLETE_URL = (
     "https://meteo.ua/front/forecast/autocomplete?phrase={phrase}&lang=ua"
 )
 MAX_RESULTS = 30
+MIN_CHARS = 3
 _URL_RE = re.compile(r"/ua/(\d+)/(.+)")
+
+SEARCH_AGAIN_VALUE = "__search_again__"
 
 
 async def _fetch_cities(phrase: str) -> list[dict]:
@@ -68,7 +71,7 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             phrase = user_input.get("phrase", "").strip()
-            if len(phrase) < 2:
+            if len(phrase) < MIN_CHARS:
                 errors["phrase"] = "too_short"
             else:
                 self._cities = await _fetch_cities(phrase)
@@ -84,7 +87,7 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     TextSelectorConfig(type=TextSelectorType.TEXT)
                 ),
             }),
-            description_placeholders={"min_chars": "2"},
+            description_placeholders={"min_chars": str(MIN_CHARS)},
             errors=errors,
         )
 
@@ -93,25 +96,31 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            value = user_input.get("city", "")
-            parts = value.split("/", 1)
-            if len(parts) == 2:
-                city_id, slug = parts
-                title = next(
-                    (c["title"] for c in self._cities if c["city_id"] == city_id),
-                    slug,
-                )
-                await self.async_set_unique_id(f"meteo_ua_{city_id}")
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title=f"Meteo UA \u2014 {title}",
-                    data={
-                        CONF_CITY_ID: city_id,
-                        CONF_CITY_SLUG: slug,
-                        CONF_CITY_NAME: title,
-                    },
-                )
-            errors["city"] = "invalid_selection"
+            value = user_input.get("city")
+
+            if not value:
+                errors["city"] = "no_selection"
+            elif value == SEARCH_AGAIN_VALUE:
+                return await self.async_step_user()
+            else:
+                parts = value.split("/", 1)
+                if len(parts) == 2:
+                    city_id, slug = parts
+                    title = next(
+                        (c["title"] for c in self._cities if c["city_id"] == city_id),
+                        slug,
+                    )
+                    await self.async_set_unique_id(f"meteo_ua_{city_id}")
+                    self._abort_if_unique_id_configured()
+                    return self.async_create_entry(
+                        title=f"Meteo UA \u2014 {title}",
+                        data={
+                            CONF_CITY_ID: city_id,
+                            CONF_CITY_SLUG: slug,
+                            CONF_CITY_NAME: title,
+                        },
+                    )
+                errors["city"] = "invalid_selection"
 
         options = [
             SelectOptionDict(
@@ -120,11 +129,17 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
             for c in self._cities
         ]
+        options.append(
+            SelectOptionDict(
+                value=SEARCH_AGAIN_VALUE,
+                label="\🔍 Шукати інше місто...",
+            )
+        )
 
         return self.async_show_form(
             step_id="pick",
             data_schema=vol.Schema({
-                vol.Required("city"): SelectSelector(
+                vol.Optional("city"): SelectSelector(
                     SelectSelectorConfig(
                         options=options,
                         mode=SelectSelectorMode.DROPDOWN,

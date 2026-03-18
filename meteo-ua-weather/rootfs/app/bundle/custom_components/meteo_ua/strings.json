@@ -3,7 +3,7 @@
         "step": {
             "user": {
                 "title": "Meteo UA Weather",
-                "description": "Enter the name of a settlement (min 2 characters)",
+                "description": "Enter the name of a settlement (min 3 characters)",
                 "data": {
                     "phrase": "Settlement name"
                 }
@@ -17,8 +17,9 @@
             }
         },
         "error": {
-            "too_short": "Enter at least 2 characters",
+            "too_short": "Enter at least 3 characters",
             "no_results": "No results found. Try a different query",
+            "no_selection": "Please select a settlement from the list",
             "invalid_selection": "Select a settlement from the list"
         },
         "abort": {
