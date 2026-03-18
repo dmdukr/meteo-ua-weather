@@ -21,28 +21,6 @@ from .coordinator import MeteoUaCoordinator
 
 _UA_TZ = timezone(timedelta(hours=2))
 
-# All HA weather conditions for icon test
-_ALL_CONDITIONS = [
-    "sunny",
-    "clear-night",
-    "partlycloudy",
-    "cloudy",
-    "rainy",
-    "pouring",
-    "lightning",
-    "lightning-rainy",
-    "snowy",
-    "snowy-rainy",
-    "fog",
-    "hail",
-    "windy",
-    "windy-variant",
-    "exceptional",
-]
-
-# Set to True to test all icons (each day = different condition)
-_TEST_ICONS = True
-
 
 def _parse_temp(temp_str: str) -> float | None:
     if not temp_str:
@@ -66,13 +44,15 @@ async def async_setup_entry(
 
 
 class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
-    """Current weather + 30-day daily forecast."""
+    """Current weather + daily and hourly forecast."""
 
     _attr_has_entity_name = True
     _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_native_pressure_unit = UnitOfPressure.MMHG
     _attr_native_wind_speed_unit = UnitOfSpeed.METERS_PER_SECOND
-    _attr_supported_features = WeatherEntityFeature.FORECAST_DAILY
+    _attr_supported_features = (
+        WeatherEntityFeature.FORECAST_DAILY | WeatherEntityFeature.FORECAST_HOURLY
+    )
 
     def __init__(self, coordinator: MeteoUaCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
@@ -117,17 +97,13 @@ class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
         }
 
     async def async_forecast_daily(self) -> list[Forecast]:
-        """Return 30-day daily forecast in HA standard format."""
-        now = datetime.now(_UA_TZ)
-
-        if _TEST_ICONS:
-            return self._test_forecast(now)
-
-        return self._real_forecast(now)
-
-    def _real_forecast(self, now: datetime) -> list[Forecast]:
+        """Return 30-day daily forecast."""
         monthly = self.coordinator.data.get("monthly", {})
         raw = monthly.get("forecast", [])
+        if not raw:
+            return []
+
+        now = datetime.now(_UA_TZ)
         result: list[Forecast] = []
         for i, day in enumerate(raw):
             dt = now + timedelta(days=i)
@@ -141,19 +117,25 @@ class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
             )
         return result
 
-    def _test_forecast(self, now: datetime) -> list[Forecast]:
-        """Generate 30 days with cycling through all HA conditions."""
+    async def async_forecast_hourly(self) -> list[Forecast]:
+        """Return hourly forecast from weatherDetailSlider."""
+        current = self.coordinator.data.get("current", {})
+        hourly = current.get("hourly", [])
+        if not hourly:
+            return []
+
         result: list[Forecast] = []
-        for i in range(30):
-            dt = now + timedelta(days=i)
-            cond = _ALL_CONDITIONS[i % len(_ALL_CONDITIONS)]
-            temp = -10 + i * 1.5  # gradient from -10 to +33
+        for h in hourly:
             result.append(
                 Forecast(
-                    datetime=dt.strftime("%Y-%m-%dT00:00:00+02:00"),
-                    condition=cond,
-                    native_temperature=round(temp, 1),
-                    native_wind_speed=round(1.0 + i * 0.3, 1),
+                    datetime=h["datetime"],
+                    condition=h.get("condition", "cloudy"),
+                    native_temperature=h.get("temperature"),
+                    humidity=h.get("humidity"),
+                    native_pressure=h.get("pressure"),
+                    native_wind_speed=h.get("wind_speed"),
+                    wind_bearing=h.get("wind_bearing"),
+                    precipitation=h.get("precipitation"),
                 )
             )
         return result
