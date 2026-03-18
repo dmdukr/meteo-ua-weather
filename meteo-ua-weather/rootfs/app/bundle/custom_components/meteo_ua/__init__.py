@@ -61,17 +61,13 @@ async def _register_card(hass: HomeAssistant) -> None:
     from homeassistant.components.frontend import add_extra_js_url
 
     frontend_dir = Path(__file__).parent / "frontend"
-    cards = {
-        "/meteo_ua/meteo-monthly-card.js": "meteo-monthly-card.js",
-        "/meteo_ua/atmospheric-weather-card.js": "atmospheric-weather-card.js",
-    }
+    url_path = "/meteo_ua/meteo-monthly-card.js"
+    file_name = "meteo-monthly-card.js"
 
     await hass.http.async_register_static_paths([
-        StaticPathConfig(url_path=url, path=str(frontend_dir / filename), cache_headers=True)
-        for url, filename in cards.items()
+        StaticPathConfig(url_path=url_path, path=str(frontend_dir / file_name), cache_headers=True)
     ])
-    for url in cards:
-        add_extra_js_url(hass, url)
+    add_extra_js_url(hass, url_path)
 
     hass.data.setdefault(DOMAIN, {})["_card_registered"] = True
-    _LOGGER.info("Meteo UA: registered %d frontend cards", len(cards))
+    _LOGGER.info("Meteo UA: registered meteo-monthly-card")
