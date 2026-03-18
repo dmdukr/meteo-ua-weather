@@ -13,7 +13,7 @@ from ..const import ICON_TO_HA_CONDITION
 
 _LOGGER = logging.getLogger(__name__)
 
-CITY_PAGE_URL = "https://meteo.ua/{city_id}/{city_slug}"
+CITY_PAGE_URL = "https://meteo.ua/ua/{city_id}/{city_slug}"
 
 # Kyiv timezone (UTC+2 / UTC+3 summer)
 _UA_TZ = timezone(timedelta(hours=2))

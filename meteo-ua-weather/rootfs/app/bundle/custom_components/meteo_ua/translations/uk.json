@@ -1,0 +1,19 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Meteo UA Weather",
+                "description": "Почніть вводити назву — список фільтрується автоматично",
+                "data": {
+                    "settlement": "Населений пункт"
+                }
+            }
+        },
+        "error": {
+            "invalid_selection": "Оберіть населений пункт зі списку"
+        },
+        "abort": {
+            "already_configured": "Цей населений пункт вже налаштований"
+        }
+    }
+}

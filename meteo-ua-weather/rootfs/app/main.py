@@ -22,7 +22,7 @@ SCHEDULE_FILE = DATA_DIR / "schedule.json"
 CITIES_FILE = DATA_DIR / "cities.json"
 OPTIONS_FILE = Path("/data/options.json")
 
-_LOGGER = logging.getLogger("meteo_ua_parser")
+_LOGGER = logging.getLogger("meteo_ua_weather")
 
 
 def load_options() -> dict:

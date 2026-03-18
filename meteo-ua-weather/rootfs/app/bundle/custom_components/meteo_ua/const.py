@@ -8,7 +8,7 @@ CONF_CITY_NAME = "city_name"
 UPDATE_INTERVAL_CURRENT = 1800   # 30 min
 UPDATE_INTERVAL_FORECAST = 7200  # 2 hours
 
-MONTHLY_URL = "https://meteo.ua/{city_id}/{city_slug}/month"
+MONTHLY_URL = "https://meteo.ua/ua/{city_id}/{city_slug}/month"
 
 # meteo.ua icon name -> HA weather condition
 ICON_TO_HA_CONDITION = {

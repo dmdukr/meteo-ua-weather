@@ -12,97 +12,63 @@ from ..const import MONTHLY_URL, ICON_TO_HA_CONDITION
 _LOGGER = logging.getLogger(__name__)
 
 # ── Localization tables ─────────────────────────────────────────────────────
-# meteo.ua always returns Russian. We translate to Ukrainian or English
-# depending on HAOS language. Russian/Ukrainian → uk, everything else → en.
+# With /ua/ prefix meteo.ua returns Ukrainian content natively.
+# For non-Ukrainian HAOS we translate UK → EN.
 
-_MONTHS_RU_UK = {
-    "января": "січня", "февраля": "лютого", "марта": "березня",
-    "апреля": "квітня", "мая": "травня", "июня": "червня",
-    "июля": "липня", "августа": "серпня", "сентября": "вересня",
-    "октября": "жовтня", "ноября": "листопада", "декабря": "грудня",
+_MONTHS_UK_EN = {
+    "січня": "January", "лютого": "February", "березня": "March",
+    "квітня": "April", "травня": "May", "червня": "June",
+    "липня": "July", "серпня": "August", "вересня": "September",
+    "жовтня": "October", "листопада": "November", "грудня": "December",
 }
 
-_MONTHS_RU_EN = {
-    "января": "January", "февраля": "February", "марта": "March",
-    "апреля": "April", "мая": "May", "июня": "June",
-    "июля": "July", "августа": "August", "сентября": "September",
-    "октября": "October", "ноября": "November", "декабря": "December",
-}
-
-_CONDITIONS_RU_UK = {
-    "ясное небо": "ясне небо",
-    "ясно": "ясно",
-    "легкая облачность": "легка хмарність",
-    "небольшая облачность": "невелика хмарність",
-    "рассеянные облака": "розсіяні хмари",
-    "облачно с прояснениями": "хмарно з проясненнями",
-    "пасмурная погода": "похмура погода",
-    "пасмурно": "похмуро",
-    "небольшой дождь": "невеликий дощ",
-    "дождь": "дощ",
-    "умеренный дождь": "помірний дощ",
-    "сильный дождь": "сильний дощ",
-    "ливень": "злива",
-    "гроза": "гроза",
-    "гроза с дождем": "гроза з дощем",
-    "гроза с сильным дождем": "гроза з сильним дощем",
-    "небольшой снег": "невеликий сніг",
-    "снег": "сніг",
-    "сильный снег": "сильний сніг",
-    "снегопад": "снігопад",
-    "дождь со снегом": "дощ зі снігом",
-    "мокрый снег": "мокрий сніг",
-    "туман": "туман",
-    "дымка": "серпанок",
-}
-
-_CONDITIONS_RU_EN = {
-    "ясное небо": "clear sky",
+_CONDITIONS_UK_EN = {
+    "ясне небо": "clear sky",
     "ясно": "clear",
-    "легкая облачность": "partly cloudy",
-    "небольшая облачность": "partly cloudy",
-    "рассеянные облака": "scattered clouds",
-    "облачно с прояснениями": "mostly cloudy",
-    "пасмурная погода": "overcast",
-    "пасмурно": "overcast",
-    "небольшой дождь": "light rain",
-    "дождь": "rain",
-    "умеренный дождь": "moderate rain",
-    "сильный дождь": "heavy rain",
-    "ливень": "downpour",
+    "легка хмарність": "partly cloudy",
+    "невелика хмарність": "partly cloudy",
+    "розсіяні хмари": "scattered clouds",
+    "хмарно з проясненнями": "mostly cloudy",
+    "похмура погода": "overcast",
+    "похмуро": "overcast",
+    "невеликий дощ": "light rain",
+    "дощ": "rain",
+    "помірний дощ": "moderate rain",
+    "сильний дощ": "heavy rain",
+    "злива": "downpour",
     "гроза": "thunderstorm",
-    "гроза с дождем": "thunderstorm with rain",
-    "гроза с сильным дождем": "thunderstorm with heavy rain",
-    "небольшой снег": "light snow",
-    "снег": "snow",
-    "сильный снег": "heavy snow",
-    "снегопад": "snowfall",
-    "дождь со снегом": "rain and snow",
-    "мокрый снег": "sleet",
+    "гроза з дощем": "thunderstorm with rain",
+    "гроза з сильним дощем": "thunderstorm with heavy rain",
+    "невеликий сніг": "light snow",
+    "сніг": "snow",
+    "сильний сніг": "heavy snow",
+    "снігопад": "snowfall",
+    "дощ зі снігом": "rain and snow",
+    "мокрий сніг": "sleet",
     "туман": "fog",
-    "дымка": "haze",
+    "серпанок": "haze",
 }
-
-_WIND_UNIT = {"uk": "м/с", "en": "m/s"}
 
 
 def _resolve_locale(lang: str) -> str:
-    """ru/uk → 'uk', everything else → 'en'."""
+    """uk/ru → 'uk' (pass-through), everything else → 'en' (translate)."""
     return "uk" if lang in ("uk", "ru") else "en"
 
 
 def _localize_date(text: str, locale: str) -> str:
-    table = _MONTHS_RU_UK if locale == "uk" else _MONTHS_RU_EN
+    if locale == "uk":
+        return text
     result = text
-    for ru, loc in table.items():
-        result = result.replace(ru, loc)
+    for uk, en in _MONTHS_UK_EN.items():
+        result = result.replace(uk, en)
     return result
 
 
 def _localize_condition(text: str, locale: str) -> str:
-    table = _CONDITIONS_RU_UK if locale == "uk" else _CONDITIONS_RU_EN
+    if locale == "uk":
+        return text
     lower = text.strip().lower()
-    return table.get(lower, _localize_date(text, locale))
+    return _CONDITIONS_UK_EN.get(lower, text)
 
 
 def _localize_wind(text: str, locale: str) -> str:
