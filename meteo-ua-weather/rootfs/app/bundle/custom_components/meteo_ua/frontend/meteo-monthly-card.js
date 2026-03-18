@@ -1,5 +1,5 @@
 /**
- * METEO MONTHLY CARD v1.0.0
+ * METEO MONTHLY CARD v0.2.0
  * Custom Lovelace card — 30-day weather forecast grid
  * Part of meteo-ua-weather integration
  * Data: sensor with json attr "forecast"
@@ -124,7 +124,7 @@ window.customCards.push({
 });
 
 console.info(
-  "%c METEO MONTHLY CARD %c v1.0.0 ",
+  "%c METEO MONTHLY CARD %c v0.2.0 ",
   "color:#fff;background:#1565c0;padding:4px 8px;border-radius:4px 0 0 4px;font-weight:700",
   "color:#1565c0;background:#e3f2fd;padding:4px 8px;border-radius:0 4px 4px 0"
 );
