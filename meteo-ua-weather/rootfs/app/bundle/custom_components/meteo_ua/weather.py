@@ -1,9 +1,15 @@
 """Weather platform for Meteo UA."""
 from __future__ import annotations
 
+import re
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from homeassistant.components.weather import WeatherEntity
+from homeassistant.components.weather import (
+    Forecast,
+    WeatherEntity,
+    WeatherEntityFeature,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfPressure, UnitOfSpeed, UnitOfTemperature
 from homeassistant.core import HomeAssistant
@@ -12,6 +18,24 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, CONF_CITY_NAME, CONF_CITY_SLUG
 from .coordinator import MeteoUaCoordinator
+
+_UA_TZ = timezone(timedelta(hours=2))
+
+
+def _parse_temp(temp_str: str) -> float | None:
+    """Parse temp string like '+2', '-5', '0' to float."""
+    if not temp_str:
+        return None
+    m = re.search(r"[+-]?\d+", temp_str.replace("\u2212", "-"))
+    return float(m.group()) if m else None
+
+
+def _parse_wind_speed(wind_str: str) -> float | None:
+    """Parse wind string like '2.4 m/s' to float."""
+    if not wind_str:
+        return None
+    m = re.search(r"[\d.]+", wind_str)
+    return float(m.group()) if m else None
 
 
 async def async_setup_entry(
@@ -22,12 +46,13 @@ async def async_setup_entry(
 
 
 class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
-    """Current weather + 30-day forecast in attributes."""
+    """Current weather + 30-day daily forecast."""
 
     _attr_has_entity_name = True
     _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_native_pressure_unit = UnitOfPressure.MMHG
     _attr_native_wind_speed_unit = UnitOfSpeed.METERS_PER_SECOND
+    _attr_supported_features = WeatherEntityFeature.FORECAST_DAILY
 
     def __init__(self, coordinator: MeteoUaCoordinator, entry: ConfigEntry) -> None:
         super().__init__(coordinator)
@@ -70,3 +95,28 @@ class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
             "forecast_days": monthly.get("days", 0),
             "forecast_city": monthly.get("city", ""),
         }
+
+    async def async_forecast_daily(self) -> list[Forecast]:
+        """Return 30-day daily forecast in HA standard format."""
+        monthly = self.coordinator.data.get("monthly", {})
+        raw = monthly.get("forecast", [])
+        if not raw:
+            return []
+
+        now = datetime.now(_UA_TZ)
+        result: list[Forecast] = []
+
+        for i, day in enumerate(raw):
+            dt = now + timedelta(days=i)
+            dt_str = dt.strftime("%Y-%m-%dT00:00:00+02:00")
+
+            result.append(
+                Forecast(
+                    datetime=dt_str,
+                    condition=day.get("ha_condition", "cloudy"),
+                    native_temperature=_parse_temp(day.get("temp", "")),
+                    native_wind_speed=_parse_wind_speed(day.get("wind", "")),
+                )
+            )
+
+        return result
