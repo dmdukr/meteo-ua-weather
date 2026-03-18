@@ -1,5 +1,5 @@
 /**
- * METEO MONTHLY CARD v0.2.0
+ * METEO UA WEATHER FORECAST v0.2.1
  * Custom Lovelace card — 30-day weather forecast grid
  * Part of meteo-ua-weather integration
  * Data: sensor with json attr "forecast"
@@ -33,7 +33,7 @@ const METEO_COLORS = {
   "clear-night": "#5c6bc0",
 };
 
-class MeteoMonthlyCard extends HTMLElement {
+class MeteoUaWeatherForecastCard extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     this._render();
@@ -114,17 +114,17 @@ class MeteoMonthlyCard extends HTMLElement {
   }
 }
 
-customElements.define("meteo-monthly-card", MeteoMonthlyCard);
+customElements.define("meteo-ua-weather-forecast-card", MeteoUaWeatherForecastCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: "meteo-monthly-card",
-  name: "Meteo Monthly Card",
+  type: "meteo-ua-weather-forecast-card",
+  name: "Meteo UA Weather Forecast",
   description: "30-day weather forecast grid (meteo.ua)",
   preview: true,
 });
 
 console.info(
-  "%c METEO MONTHLY CARD %c v0.2.0 ",
+  "%c METEO UA WEATHER FORECAST %c v0.2.1 ",
   "color:#fff;background:#1565c0;padding:4px 8px;border-radius:4px 0 0 4px;font-weight:700",
   "color:#1565c0;background:#e3f2fd;padding:4px 8px;border-radius:0 4px 4px 0"
 );
