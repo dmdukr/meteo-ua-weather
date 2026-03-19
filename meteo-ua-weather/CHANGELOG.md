@@ -1,3 +1,9 @@
+## 0.4.0
+
+- Card: forecast.mode (Простий/Графік) moved to hourly forecast group
+- Card: daily_columns — days per row with CSS grid auto-resize
+- Card: "Simple"/"Chart" translated to Ukrainian
+
 ## 0.3.9
 
 - Card editor: reorganized — General → Поточна погода → Погодинний прогноз → Поденний прогноз
