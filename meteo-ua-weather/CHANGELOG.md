@@ -1,4 +1,9 @@
 ## 0.4.5
+## 0.4.7
+
+- Fix: all editor helper texts translated to Ukrainian
+- No untranslated English strings remaining in editor
+
 ## 0.4.6
 
 - Card rebuilt from TypeScript source (troinine/ha-weather-forecast-card)
