@@ -118,14 +118,20 @@ class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
         return result
 
     async def async_forecast_hourly(self) -> list[Forecast]:
-        """Return hourly forecast from weatherDetailSlider."""
+        """Return hourly forecast starting from current_hour - 1."""
         current = self.coordinator.data.get("current", {})
         hourly = current.get("hourly", [])
         if not hourly:
             return []
 
+        now = datetime.now(_UA_TZ)
+        start_dt = now.replace(minute=0, second=0, microsecond=0) - timedelta(hours=1)
+        start_iso = start_dt.strftime("%Y-%m-%dT%H:00:00+02:00")
+
         result: list[Forecast] = []
         for h in hourly:
+            if h["datetime"] < start_iso:
+                continue
             result.append(
                 Forecast(
                     datetime=h["datetime"],

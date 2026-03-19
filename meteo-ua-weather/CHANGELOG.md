@@ -1,3 +1,7 @@
+## 0.3.8
+
+- Hourly forecast starts from current_hour - 1
+
 ## 0.3.7
 
 - Card editor: Ukrainian localization for all labels
