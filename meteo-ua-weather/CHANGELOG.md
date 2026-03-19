@@ -1,3 +1,8 @@
+## 0.4.3
+
+- Fixed empty expandable group labels (Погодинний/Поденний прогноз)
+- Fixed daily_columns slider position (default 6)
+
 ## 0.4.2
 
 - Fixed encoding — Ukrainian text now displays correctly
