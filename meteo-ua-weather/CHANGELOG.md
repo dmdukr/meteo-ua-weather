@@ -1,3 +1,11 @@
+## 0.4.4
+
+- Rebuilt card from custom base — hourly + daily grid shown simultaneously
+- Hourly: scrollable strip with icons, temp, wind
+- Daily: 30-day grid with colored icons (6 per row default)
+- Editor with collapsible groups and UK localization
+- DOM-based rendering (no innerHTML)
+
 ## 0.4.3
 
 - Fixed empty expandable group labels (Погодинний/Поденний прогноз)
