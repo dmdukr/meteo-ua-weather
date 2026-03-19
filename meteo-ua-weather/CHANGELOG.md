@@ -1,3 +1,9 @@
+## 0.3.6
+
+- Card editor: hourly forecast settings in collapsible group
+- Card editor: daily forecast settings in collapsible group
+- Card rebuilt from TypeScript source with renamed custom element
+
 # Changelog
 
 ## 0.3.5
