@@ -1,4 +1,11 @@
 ## 0.4.5
+## 0.4.9
+
+- Attribute entities moved to Current Weather section
+- Current temperature precision moved to Current Weather
+- Forecast temperature precision moved to Hourly Forecast
+- Advanced settings now only contains icons path
+
 ## 0.4.8
 
 - Removed forecast type selector (always hourly)
