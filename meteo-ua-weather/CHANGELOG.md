@@ -1,3 +1,8 @@
+## 0.4.2
+
+- Fixed encoding — Ukrainian text now displays correctly
+- Rebuilt card from clean source with proper UTF-8
+
 ## 0.4.0
 
 - Removed "Weather to show" selector — current weather always shown
