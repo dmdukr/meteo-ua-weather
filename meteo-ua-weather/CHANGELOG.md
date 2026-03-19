@@ -1,3 +1,9 @@
+## 0.4.5
+
+- Restored full card with monthly grid, SVG temperature waves, dynamic icons
+- Hourly chart + daily 30-day grid shown simultaneously
+- wfc-monthly-grid component with color gradient temperature curves
+
 ## 0.4.4
 
 - Rebuilt card from custom base — hourly + daily grid shown simultaneously
