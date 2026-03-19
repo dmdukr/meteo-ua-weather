@@ -1,5 +1,14 @@
 ## 0.4.0
 
+- Removed "Weather to show" selector — current weather always shown
+- Added "Show hourly forecast" toggle in Hourly group
+- Added "Show daily forecast" toggle in Daily group
+- Moved forecast display mode (Simple/Chart) to Hourly group
+- Added "Days per row" slider (default 6) to Daily group
+- Full Ukrainian localization of all labels and helpers
+
+## 0.4.0
+
 - Card: forecast.mode (Простий/Графік) moved to hourly forecast group
 - Card: daily_columns — days per row with CSS grid auto-resize
 - Card: "Simple"/"Chart" translated to Ukrainian
