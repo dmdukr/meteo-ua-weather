@@ -1,3 +1,9 @@
+## 0.3.7
+
+- Card editor: Ukrainian localization for all labels
+- Card editor: forecast interactions moved into hourly forecast group as "Взаємодія іконок"
+- Card editor: clearer group labels
+
 ## 0.3.6
 
 - Card editor: hourly forecast settings in collapsible group
