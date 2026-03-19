@@ -1,3 +1,9 @@
+## 0.3.9
+
+- Card editor: reorganized — General → Поточна погода → Погодинний прогноз → Поденний прогноз
+- All helper texts translated to Ukrainian
+- Fixed "Extra прогноз атрибут" label
+
 ## 0.3.8
 
 - Hourly forecast starts from current_hour - 1
