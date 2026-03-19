@@ -1,4 +1,12 @@
 ## 0.4.5
+## 0.4.6
+
+- Card rebuilt from TypeScript source (troinine/ha-weather-forecast-card)
+- Monthly forecast grid: 30-day icons, temperature wave, color-coded
+- Editor: Monthly forecast settings (columns, wind, chart, compact)
+- Editor: Hourly/Daily expandable groups with UK localization
+- All editor labels and helpers translated to Ukrainian
+
 
 - Restored full card with monthly grid, SVG temperature waves, dynamic icons
 - Hourly chart + daily 30-day grid shown simultaneously
