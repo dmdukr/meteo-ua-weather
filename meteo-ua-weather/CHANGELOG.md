@@ -1,4 +1,8 @@
 ## 0.4.5
+## 0.5.0
+
+- Removed forecast type selector (hourly/daily) from editor
+
 ## 0.4.9
 
 - Attribute entities moved to Current Weather section
