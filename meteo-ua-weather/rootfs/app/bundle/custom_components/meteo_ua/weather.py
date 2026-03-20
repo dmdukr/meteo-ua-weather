@@ -96,23 +96,36 @@ class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
             "forecast_city": monthly.get("city", ""),
         }
 
+    _TEST_CONDITIONS = [
+        "clear-night", "cloudy", "exceptional", "fog",
+        "hail", "lightning", "lightning-rainy", "partlycloudy",
+        "pouring", "rainy", "snowy", "snowy-rainy",
+        "sunny", "windy", "windy-variant",
+        "clear-night", "cloudy", "fog", "hail",
+        "lightning", "lightning-rainy", "partlycloudy",
+        "pouring", "rainy", "snowy", "snowy-rainy",
+        "sunny", "windy", "windy-variant", "exceptional",
+    ]
+
     async def async_forecast_daily(self) -> list[Forecast]:
-        """Return 30-day daily forecast."""
+        """Return 30-day daily forecast (TEST MODE: all icon types)."""
         monthly = self.coordinator.data.get("monthly", {})
         raw = monthly.get("forecast", [])
-        if not raw:
-            return []
 
         now = datetime.now(_UA_TZ)
         result: list[Forecast] = []
-        for i, day in enumerate(raw):
+
+        for i in range(30):
             dt = now + timedelta(days=i)
+            day = raw[i] if i < len(raw) else {}
+            temp = _parse_temp(day.get("temp", "")) if day else (-10 + i * 1.5)
+            wind = _parse_wind_speed(day.get("wind", "")) if day else (2 + i * 0.3)
             result.append(
                 Forecast(
                     datetime=dt.strftime("%Y-%m-%dT00:00:00+02:00"),
-                    condition=day.get("ha_condition", "cloudy"),
-                    native_temperature=_parse_temp(day.get("temp", "")),
-                    native_wind_speed=_parse_wind_speed(day.get("wind", "")),
+                    condition=self._TEST_CONDITIONS[i % len(self._TEST_CONDITIONS)],
+                    native_temperature=temp,
+                    native_wind_speed=wind,
                 )
             )
         return result
