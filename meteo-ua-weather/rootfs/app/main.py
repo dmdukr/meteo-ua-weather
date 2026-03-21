@@ -423,18 +423,20 @@ def main() -> None:
         _LOGGER.info("Integration changed — notifying user to restart HA")
         _notify_restart(
             "Інтеграцію Meteo UA Weather оновлено. "
-            "Перезавантажте Home Assistant (Settings → System → Restart) для активації змін.\n\n"
+            "Перезавантажте Home Assistant (Settings → System → Restart) "
+            "та очистіть кеш браузера (**Ctrl+Shift+R**).\n\n"
             "Meteo UA Weather integration updated. "
-            "Restart Home Assistant (Settings → System → Restart) to activate changes.",
+            "Restart Home Assistant (Settings → System → Restart) "
+            "and clear browser cache (**Ctrl+Shift+R**).",
             notification_id="meteo_ua_restart_required",
         )
     elif changes.get("card"):
         _LOGGER.info("Card JS changed — notifying user to refresh browser")
         _notify_restart(
             "Карточку Meteo UA Weather оновлено. "
-            "Оновіть сторінку у браузері (**Ctrl+Shift+R**).\n\n"
+            "Очистіть кеш браузера (**Ctrl+Shift+R**).\n\n"
             "Meteo UA Weather card updated. "
-            "Refresh your browser (**Ctrl+Shift+R**).",
+            "Clear browser cache (**Ctrl+Shift+R**).",
             notification_id="meteo_ua_card_updated",
         )
     else:
