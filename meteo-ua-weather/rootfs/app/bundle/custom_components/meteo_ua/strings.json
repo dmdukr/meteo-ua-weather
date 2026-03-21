@@ -3,15 +3,9 @@
         "step": {
             "user": {
                 "title": "Meteo UA Weather",
-                "description": "Enter the name of the settlement (min 3 characters).",
+                "description": "Select a city from the list, or search by name and press Submit to update the list.",
                 "data": {
-                    "phrase": "Settlement name"
-                }
-            },
-            "select": {
-                "title": "Select settlement",
-                "description": "Choose a settlement from the search results.",
-                "data": {
+                    "phrase": "Search",
                     "city": "Settlement"
                 }
             }
