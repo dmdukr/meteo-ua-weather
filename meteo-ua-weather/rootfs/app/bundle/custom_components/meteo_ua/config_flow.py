@@ -160,7 +160,7 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required("city"): SelectSelector(
                     SelectSelectorConfig(
                         options=[
-                            SelectOptionDict(value="_back", label="\U0001f50d Новий пошук..."),
+                            SelectOptionDict(value="_back", label="\U0001f50d Новий пошук \u2014 натисніть Надіслати \u27a1"),
                             *_build_options(self._cities),
                         ],
                         mode=SelectSelectorMode.DROPDOWN,
