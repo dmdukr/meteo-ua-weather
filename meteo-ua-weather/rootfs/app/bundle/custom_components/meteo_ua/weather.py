@@ -108,11 +108,14 @@ class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
             dt = now + timedelta(days=i)
             if i < len(raw):
                 day = raw[i]
+                temp_high = day.get("temp_day") or _parse_temp(day.get("temp", ""))
+                temp_low = day.get("temp_night")
                 result.append(
                     Forecast(
                         datetime=dt.strftime("%Y-%m-%dT00:00:00+02:00"),
                         condition=day.get("ha_condition", "cloudy"),
-                        native_temperature=_parse_temp(day.get("temp", "")),
+                        native_temperature=temp_high,
+                        native_templow=temp_low,
                         native_wind_speed=_parse_wind_speed(day.get("wind", "")),
                     )
                 )

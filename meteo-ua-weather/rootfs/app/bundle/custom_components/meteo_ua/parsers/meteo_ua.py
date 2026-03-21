@@ -90,12 +90,29 @@ def _map_icon(raw: str) -> str:
 
 # ── HTML parser ─────────────────────────────────────────────────────────────
 
+def _parse_temp_value(s: str) -> float | None:
+    """Extract numeric temperature from string like '+6°' or '−2°'."""
+    if not s:
+        return None
+    m = re.search(r"[+-]?\d+", s.replace("\u2212", "-").replace("−", "-"))
+    return float(m.group()) if m else None
+
+
 def _parse_monthly(html: str, locale: str = "uk") -> list[dict[str, Any]]:
     temps = re.findall(r'data-key="temperature">([^<]+)', html)
     infos = re.findall(r'data-key="info">([^<]+)', html)
     winds_all = re.findall(r'data-key="wind">([^<]+)', html)
     winds = winds_all[::2] if winds_all else []
     captions = re.findall(r'data-key="caption"[^>]*>([^<]+)', html)
+
+    # Parse period temperatures: 4 per day (Ранок, День, Вечір, Ніч)
+    period_temps = re.findall(r'weather-detail__main-period-temp[^>]*>([^<]+)', html)
+    day_temps: list[float | None] = []
+    night_temps: list[float | None] = []
+    for i in range(0, len(period_temps), 4):
+        chunk = period_temps[i:i + 4]
+        day_temps.append(_parse_temp_value(chunk[1]) if len(chunk) > 1 else None)    # День
+        night_temps.append(_parse_temp_value(chunk[3]) if len(chunk) > 3 else None)  # Ніч
 
     icons_raw = re.findall(
         r'weather-detail__main-icon[^>]*>.*?(?:href|xlink:href)="[^#]*#weather-([^"]+)"',
@@ -122,7 +139,7 @@ def _parse_monthly(html: str, locale: str = "uk") -> list[dict[str, Any]]:
             if m:
                 date_str = m.group(1).strip()
         icon_raw = icons_raw[i] if i < len(icons_raw) else ""
-        forecast.append({
+        entry: dict[str, Any] = {
             "day": i + 1,
             "date": _localize_date(date_str, locale),
             "temp": temps[i].strip(),
@@ -130,7 +147,12 @@ def _parse_monthly(html: str, locale: str = "uk") -> list[dict[str, Any]]:
             "ha_condition": _map_icon(icon_raw),
             "wind": _localize_wind(winds[i].strip(), locale) if i < len(winds) else "",
             "icon": icon_raw,
-        })
+        }
+        if i < len(day_temps) and day_temps[i] is not None:
+            entry["temp_day"] = day_temps[i]
+        if i < len(night_temps) and night_temps[i] is not None:
+            entry["temp_night"] = night_temps[i]
+        forecast.append(entry)
     return forecast
 
 
