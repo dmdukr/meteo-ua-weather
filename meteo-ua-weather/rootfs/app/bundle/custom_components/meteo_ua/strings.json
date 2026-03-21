@@ -2,10 +2,16 @@
     "config": {
         "step": {
             "user": {
-                "title": "Meteo UA Weather",
-                "description": "Select a city from the list, or search by name and press Submit to update the list.",
+                "title": "Meteo UA Weather — Search",
+                "description": "Enter settlement name to search, or leave empty for top 20 cities.",
                 "data": {
-                    "phrase": "Search",
+                    "phrase": "Search (optional)"
+                }
+            },
+            "select": {
+                "title": "Meteo UA Weather — Select",
+                "description": "Choose a settlement and press Submit to create the entity.",
+                "data": {
                     "city": "Settlement"
                 }
             }
