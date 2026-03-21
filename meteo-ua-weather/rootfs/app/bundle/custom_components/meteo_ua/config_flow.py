@@ -24,7 +24,7 @@ _LOGGER = logging.getLogger(__name__)
 AUTOCOMPLETE_URL = (
     "https://meteo.ua/front/forecast/autocomplete?phrase={phrase}&lang=ua"
 )
-MAX_RESULTS = 20
+MAX_RESULTS = 50
 MIN_CHARS = 3
 _URL_RE = re.compile(r"/ua/(\d+)/(.+)")
 
@@ -49,6 +49,36 @@ DEFAULT_CITIES: list[dict] = [
     {"city_id": "33339", "slug": "cherkasy", "title": "Черкаси"},
     {"city_id": "33215", "slug": "zhytomyr", "title": "Житомир"},
     {"city_id": "33256", "slug": "sumy", "title": "Суми"},
+    {"city_id": "33243", "slug": "rivne", "title": "Рівне"},
+    {"city_id": "33279", "slug": "kamianske", "title": "Кам'янське"},
+    {"city_id": "33306", "slug": "kropyvnytskyi", "title": "Кропивницький"},
+    {"city_id": "33218", "slug": "khmelnytskyi", "title": "Хмельницький"},
+    {"city_id": "33274", "slug": "kremenchuk", "title": "Кременчук"},
+    {"city_id": "33299", "slug": "ternopil", "title": "Тернопіль"},
+    {"city_id": "33228", "slug": "ivano-frankivsk", "title": "Івано-Франківськ"},
+    {"city_id": "33222", "slug": "lutsk", "title": "Луцьк"},
+    {"city_id": "33460", "slug": "bila-tserkva", "title": "Біла Церква"},
+    {"city_id": "33286", "slug": "kramatorsk", "title": "Краматорськ"},
+    {"city_id": "33323", "slug": "melitopol", "title": "Мелітополь"},
+    {"city_id": "33241", "slug": "nizhyn", "title": "Ніжин"},
+    {"city_id": "33457", "slug": "brovary", "title": "Бровари"},
+    {"city_id": "33288", "slug": "sloviansk", "title": "Слов'янськ"},
+    {"city_id": "33230", "slug": "uzhhorod", "title": "Ужгород"},
+    {"city_id": "33341", "slug": "uman", "title": "Умань"},
+    {"city_id": "33270", "slug": "berdiansk", "title": "Бердянськ"},
+    {"city_id": "33395", "slug": "izmail", "title": "Ізмаїл"},
+    {"city_id": "33283", "slug": "nikopol", "title": "Нікополь"},
+    {"city_id": "33313", "slug": "pavlohrad", "title": "Павлоград"},
+    {"city_id": "33287", "slug": "kostiantynivka", "title": "Костянтинівка"},
+    {"city_id": "33252", "slug": "konotop", "title": "Конотоп"},
+    {"city_id": "33232", "slug": "mukachevo", "title": "Мукачево"},
+    {"city_id": "33303", "slug": "drohobych", "title": "Дрогобич"},
+    {"city_id": "33300", "slug": "stryi", "title": "Стрий"},
+    {"city_id": "33342", "slug": "smila", "title": "Сміла"},
+    {"city_id": "33375", "slug": "nova-kakhovka", "title": "Нова Каховка"},
+    {"city_id": "33324", "slug": "enerhodar", "title": "Енергодар"},
+    {"city_id": "33253", "slug": "shostka", "title": "Шостка"},
+    {"city_id": "33229", "slug": "chernivtsi", "title": "Чернівці"},
 ]
 
 
@@ -154,14 +184,17 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     )
             errors["city"] = "invalid_selection"
 
+        city_options = _build_options(self._cities)
+        default_city = city_options[0]["value"] if city_options else None
+
         return self.async_show_form(
             step_id="select",
             data_schema=vol.Schema({
-                vol.Required("city"): SelectSelector(
+                vol.Required("city", default=default_city): SelectSelector(
                     SelectSelectorConfig(
                         options=[
                             SelectOptionDict(value="_back", label="\U0001f50d Новий пошук \u2014 натисніть Надіслати \u27a1"),
-                            *_build_options(self._cities),
+                            *city_options,
                         ],
                         mode=SelectSelectorMode.DROPDOWN,
                     )
