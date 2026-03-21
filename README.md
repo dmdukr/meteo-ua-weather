@@ -1,4 +1,4 @@
-# Meteo UA Weather — Home Assistant Add-on
+# Meteo UA Weather — Home Assistant App
 
 Weather from [meteo.ua](https://meteo.ua) for Home Assistant. 30-day forecast, hourly forecast, animated weather effects, and monthly calendar grid.
 
@@ -8,7 +8,7 @@ On first start automatically installs the **Meteo UA Weather** integration and f
 
 ---
 
-*[Українська версія нижче / Ukrainian version below](#meteo-ua-weather--home-assistant-додаток)*
+*[Українська версія нижче / Ukrainian version below](#meteo-ua-weather--home-assistant-app)*
 
 ---
 
@@ -24,7 +24,7 @@ On first start automatically installs the **Meteo UA Weather** integration and f
 
 ## Installation
 
-1. In Home Assistant go to **Settings → Add-ons → Add-on Store**
+1. In Home Assistant go to **Settings → Apps → App Store**
 2. Click **⋮ → Repositories**
 3. Add: `https://github.com/dmdukr/ha-addon-meteo-ua-weather`
 4. Find **Meteo UA Weather** and click **Install**
@@ -36,7 +36,7 @@ On first start automatically installs the **Meteo UA Weather** integration and f
 ## Uninstallation
 
 1. Remove the integration: **Settings → Integrations → Meteo UA Weather → Delete**
-2. Remove the add-on: **Settings → Add-ons → Meteo UA Weather → Uninstall**
+2. Remove the add-on: **Settings → Apps → Meteo UA Weather → Uninstall**
 
 The integration automatically cleans up the Lovelace card resource and JS file when the last config entry is removed.
 
@@ -103,7 +103,7 @@ The monthly grid shows 30 days with:
 | Component | Repository |
 |-----------|-----------|
 | Card (TypeScript) | [dmdukr/ha-weather-forecast-card](https://github.com/dmdukr/ha-weather-forecast-card) |
-| Add-on + Integration | [dmdukr/ha-addon-meteo-ua-weather](https://github.com/dmdukr/ha-addon-meteo-ua-weather) |
+| App + Integration | [dmdukr/ha-addon-meteo-ua-weather](https://github.com/dmdukr/ha-addon-meteo-ua-weather) |
 
 All 3 components (card, integration, add-on) share the same version number.
 
@@ -115,22 +115,22 @@ Found a bug? Open an issue:
 
 | Field | Where to find |
 |-------|--------------|
-| **Add-on version** | Settings → Add-ons → Meteo UA Weather → Info |
+| **App version** | Settings → Apps → Meteo UA Weather → Info |
 | **Home Assistant version** | Settings → System → About |
-| **Add-on logs** | Settings → Add-ons → Meteo UA Weather → Log tab |
+| **App logs** | Settings → Apps → Meteo UA Weather → Log tab |
 | **Browser console** | F12 → Console → filter by "METEO" |
 
 ---
 
 ---
 
-# Meteo UA Weather — Home Assistant Додаток
+# Meteo UA Weather — Home Assistant App
 
 Погода з [meteo.ua](https://meteo.ua) для Home Assistant. 30-денний прогноз, погодинний прогноз, анімовані погодні ефекти та місячний календар.
 
 При першому запуску автоматично встановлює інтеграцію **Meteo UA Weather** та карточку прогнозу.
 
-> 🤖 Цей додаток — включаючи рефакторинг карточки, Python-парсери, код інтеграції та цей репозиторій — **створено за допомогою [Claude](https://claude.ai) (Anthropic)**.
+> 🤖 Цей app — включаючи рефакторинг карточки, Python-парсери, код інтеграції та цей репозиторій — **створено за допомогою [Claude](https://claude.ai) (Anthropic)**.
 
 ## Можливості
 
@@ -144,11 +144,11 @@ Found a bug? Open an issue:
 
 ## Встановлення
 
-1. В Home Assistant перейди до **Налаштування → Додатки → Магазин додатків**
+1. В Home Assistant перейди до **Налаштування → Apps → App Store**
 2. Натисни **⋮ → Repositories**
 3. Додай: `https://github.com/dmdukr/ha-addon-meteo-ua-weather`
 4. Знайди **Meteo UA Weather** та натисни **Встановити**
-5. Запусти додаток
+5. Запусти app
 6. Перезавантаж Home Assistant за запитом
 7. Перейди до **Налаштування → Інтеграції → Додати інтеграцію → Meteo UA Weather**
 8. Знайди своє місто або обери з топ-50 списку
@@ -156,7 +156,7 @@ Found a bug? Open an issue:
 ## Видалення
 
 1. Видали інтеграцію: **Налаштування → Інтеграції → Meteo UA Weather → Видалити**
-2. Видали додаток: **Налаштування → Додатки → Meteo UA Weather → Видалити**
+2. Видали app: **Налаштування → Apps → Meteo UA Weather → Видалити**
 
 Інтеграція автоматично видаляє ресурс карточки Lovelace та JS-файл при видаленні останнього запису.
 
@@ -223,9 +223,9 @@ debug_condition: snowy-rainy
 | Компонент | Репозиторій |
 |-----------|-----------|
 | Карточка (TypeScript) | [dmdukr/ha-weather-forecast-card](https://github.com/dmdukr/ha-weather-forecast-card) |
-| Додаток + Інтеграція | [dmdukr/ha-addon-meteo-ua-weather](https://github.com/dmdukr/ha-addon-meteo-ua-weather) |
+| App + Інтеграція | [dmdukr/ha-addon-meteo-ua-weather](https://github.com/dmdukr/ha-addon-meteo-ua-weather) |
 
-Всі 3 компоненти (карточка, інтеграція, додаток) мають однаковий номер версії.
+Всі 3 компоненти (карточка, інтеграція, app) мають однаковий номер версії.
 
 ## Повідомлення про помилки
 
@@ -235,7 +235,7 @@ debug_condition: snowy-rainy
 
 | Поле | Де знайти |
 |------|-----------|
-| **Версія додатку** | Налаштування → Додатки → Meteo UA Weather → Info |
+| **Версія додатку** | Налаштування → Apps → Meteo UA Weather → Info |
 | **Версія Home Assistant** | Налаштування → Система → Про систему |
-| **Логи додатку** | Налаштування → Додатки → Meteo UA Weather → Log |
+| **Логи додатку** | Налаштування → Apps → Meteo UA Weather → Log |
 | **Консоль браузера** | F12 → Console → фільтр "METEO" |
