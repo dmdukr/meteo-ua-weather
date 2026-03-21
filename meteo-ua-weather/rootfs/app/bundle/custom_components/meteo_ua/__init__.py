@@ -52,6 +52,19 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return ok
 
 
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Clean up card resources when the last config entry is removed."""
+    remaining = [
+        e for e in hass.config_entries.async_entries(DOMAIN)
+        if e.entry_id != entry.entry_id
+    ]
+    if remaining:
+        return
+
+    # Last entry removed — unregister Lovelace resource and delete JS
+    await _unregister_card(hass)
+
+
 async def _register_card(hass: HomeAssistant) -> None:
     """Copy card JS to www/ and register as Lovelace resource."""
     if hass.data.get(DOMAIN, {}).get("_card_registered"):
@@ -104,3 +117,40 @@ async def _register_card(hass: HomeAssistant) -> None:
         _LOGGER.warning("Could not auto-register card: %s — add manually: %s", exc, CARD_URL)
 
     hass.data.setdefault(DOMAIN, {})["_card_registered"] = True
+
+
+async def _unregister_card(hass: HomeAssistant) -> None:
+    """Remove Lovelace resource and delete JS file from www/."""
+    # Remove Lovelace resource
+    try:
+        from homeassistant.components.lovelace import DOMAIN as LOVELACE_DOMAIN
+        from homeassistant.components.lovelace.resources import (
+            ResourceStorageCollection,
+        )
+
+        lovelace_data = hass.data.get(LOVELACE_DOMAIN)
+        if lovelace_data is not None:
+            resources: ResourceStorageCollection | None = getattr(
+                lovelace_data, "resources", None
+            )
+            if resources is not None:
+                existing = [
+                    r for r in resources.async_items()
+                    if CARD_FILENAME in r.get("url", "")
+                ]
+                for resource in existing:
+                    await resources.async_delete_item(resource["id"])
+                    _LOGGER.info("Removed Lovelace resource: %s", resource.get("url"))
+    except Exception as exc:
+        _LOGGER.warning("Failed to remove Lovelace resource: %s", exc)
+
+    # Delete JS file from www/
+    dst = Path(hass.config.path("www")) / CARD_FILENAME
+    try:
+        if dst.exists():
+            await hass.async_add_executor_job(dst.unlink)
+            _LOGGER.info("Deleted %s", dst)
+    except Exception as exc:
+        _LOGGER.warning("Failed to delete card file: %s", exc)
+
+    hass.data.get(DOMAIN, {}).pop("_card_registered", None)

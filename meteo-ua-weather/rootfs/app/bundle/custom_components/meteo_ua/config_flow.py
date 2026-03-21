@@ -1,4 +1,4 @@
-"""Config flow for Meteo UA — single-step with live search from meteo.ua API."""
+"""Config flow for Meteo UA — two-step: search then select."""
 from __future__ import annotations
 
 import logging
@@ -54,23 +54,44 @@ async def _fetch_cities(phrase: str) -> list[dict]:
 
 
 class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Single-step config flow: type >= 3 chars, submit, pick from results."""
+    """Two-step config flow: search → select."""
 
     VERSION = 2
 
     def __init__(self) -> None:
         self._cities: list[dict] = []
-        self._last_phrase: str = ""
 
     async def async_step_user(self, user_input=None):
-        """Single step: text search + optional dropdown with results."""
+        """Step 1: enter search phrase."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            phrase = user_input.get("phrase", "").strip()
+            if len(phrase) < MIN_CHARS:
+                errors["phrase"] = "too_short"
+            else:
+                self._cities = await _fetch_cities(phrase)
+                if not self._cities:
+                    errors["phrase"] = "no_results"
+                else:
+                    return await self.async_step_select()
+
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema({
+                vol.Required("phrase"): TextSelector(
+                    TextSelectorConfig(type=TextSelectorType.TEXT)
+                ),
+            }),
+            errors=errors,
+        )
+
+    async def async_step_select(self, user_input=None):
+        """Step 2: pick a city from search results."""
         errors: dict[str, str] = {}
 
         if user_input is not None:
             city = user_input.get("city")
-            phrase = user_input.get("phrase", "").strip()
-
-            # User picked a city from dropdown → create entry
             if city:
                 parts = city.split("/", 1)
                 if len(parts) == 2:
@@ -89,40 +110,25 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             CONF_CITY_NAME: title,
                         },
                     )
+            errors["city"] = "invalid_selection"
 
-            # No city selected — do search
-            if len(phrase) < MIN_CHARS:
-                errors["phrase"] = "too_short"
-            else:
-                self._last_phrase = phrase
-                self._cities = await _fetch_cities(phrase)
-                if not self._cities:
-                    errors["phrase"] = "no_results"
-
-        # Build dynamic schema
-        schema_fields: dict = {
-            vol.Required("phrase", default=self._last_phrase): TextSelector(
-                TextSelectorConfig(type=TextSelectorType.TEXT)
-            ),
-        }
-
-        if self._cities:
-            options = [
-                SelectOptionDict(
-                    value=f"{c['city_id']}/{c['slug']}",
-                    label=c["title"],
-                )
-                for c in self._cities
-            ]
-            schema_fields[vol.Optional("city")] = SelectSelector(
-                SelectSelectorConfig(
-                    options=options,
-                    mode=SelectSelectorMode.DROPDOWN,
-                )
+        options = [
+            SelectOptionDict(
+                value=f"{c['city_id']}/{c['slug']}",
+                label=c["title"],
             )
+            for c in self._cities
+        ]
 
         return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema(schema_fields),
+            step_id="select",
+            data_schema=vol.Schema({
+                vol.Required("city"): SelectSelector(
+                    SelectSelectorConfig(
+                        options=options,
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
+                ),
+            }),
             errors=errors,
         )

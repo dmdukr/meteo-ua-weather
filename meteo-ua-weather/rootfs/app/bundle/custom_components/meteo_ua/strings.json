@@ -3,9 +3,15 @@
         "step": {
             "user": {
                 "title": "Meteo UA Weather",
-                "description": "Enter settlement name (min 3 characters) and press Submit to search. Then select from the dropdown.",
+                "description": "Enter the name of the settlement (min 3 characters).",
                 "data": {
-                    "phrase": "Settlement name",
+                    "phrase": "Settlement name"
+                }
+            },
+            "select": {
+                "title": "Select settlement",
+                "description": "Choose a settlement from the search results.",
+                "data": {
                     "city": "Settlement"
                 }
             }
