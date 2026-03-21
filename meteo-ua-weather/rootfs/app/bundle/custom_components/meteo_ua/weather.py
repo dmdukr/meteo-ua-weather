@@ -111,7 +111,7 @@ class MeteoUaWeather(CoordinatorEntity[MeteoUaCoordinator], WeatherEntity):
                 result.append(
                     Forecast(
                         datetime=dt.strftime("%Y-%m-%dT00:00:00+02:00"),
-                        condition=day.get("condition", "cloudy"),
+                        condition=day.get("ha_condition", "cloudy"),
                         native_temperature=_parse_temp(day.get("temp", "")),
                         native_wind_speed=_parse_wind_speed(day.get("wind", "")),
                     )
