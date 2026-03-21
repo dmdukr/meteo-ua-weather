@@ -102,12 +102,7 @@ The monthly grid shows 30 days with:
 
 ## Development
 
-| Component | Repository |
-|-----------|-----------|
-| Card (TypeScript) | [dmdukr/ha-weather-forecast-card](https://github.com/dmdukr/ha-weather-forecast-card) |
-| App + Integration | [dmdukr/ha-addon-meteo-ua-weather](https://github.com/dmdukr/ha-addon-meteo-ua-weather) |
-
-All 3 components (card, integration, add-on) share the same version number.
+All components (card, integration, app) are maintained in this repository and share the same version number.
 
 ## Bug reports
 
@@ -224,12 +219,7 @@ debug_condition: snowy-rainy
 
 ## Розробка
 
-| Компонент | Репозиторій |
-|-----------|-----------|
-| Карточка (TypeScript) | [dmdukr/ha-weather-forecast-card](https://github.com/dmdukr/ha-weather-forecast-card) |
-| App + Інтеграція | [dmdukr/ha-addon-meteo-ua-weather](https://github.com/dmdukr/ha-addon-meteo-ua-weather) |
-
-Всі 3 компоненти (карточка, інтеграція, app) мають однаковий номер версії.
+Всі компоненти (карточка, інтеграція, app) підтримуються в цьому репозиторії та мають однаковий номер версії.
 
 ## Повідомлення про помилки
 
