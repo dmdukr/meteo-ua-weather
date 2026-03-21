@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather Forecast Card - Development Test</title>
+    <style>
+      :root {
+        --primary-text-color: #000;
+        --secondary-text-color: #5e5e5e;
+        --ha-font-size-3xl: 28px;
+        --ha-font-size-2xl: 24px;
+        --ha-font-size-xl: 20px;
+        --ha-font-size-l: 16px;
+        --ha-font-size-m: 14px;
+        --ha-line-height-condensed: 1.2;
+        --ha-card-border-radius: 20px;
+        font-family: "Roboto", "Noto", sans-serif;
+        color: var(--primary-text-color);
+        --card-padding: 24px;
+      }
+      .body {
+        background-color: #fafafa;
+        margin: 0;
+        padding: 0;
+      }
+      .view {
+        margin: auto;
+        width: 40vw;
+        max-width: 600px;
+      }
+      .test-card {
+        display: block;
+        border-radius: 20px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 1);
+      }
+      .dark {
+        background-color: rgba(0, 0, 0, 0.85);
+        --primary-text-color: #fff;
+        --secondary-text-color: #ccc;
+        color: var(--primary-text-color);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="view">
+      <h2>Weather Forecast Card test</h2>
+      <h3>With current weather</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-1"></weather-forecast-card>
+      </div>
+      <h3>Without current weather</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-2"></weather-forecast-card>
+      </div>
+      <h3>Custom icons</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-3"></weather-forecast-card>
+      </div>
+      <h3>Custom temperature entity</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-4"></weather-forecast-card>
+      </div>
+      <h3>Chart mode</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-5"></weather-forecast-card>
+      </div>
+      <h3>Aggregated hourly data</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-6"></weather-forecast-card>
+      </div>
+      <h3>Animated background</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-7"></weather-forecast-card>
+      </div>
+      <h3>Animated background (dark)</h3>
+      <div class="test-card dark">
+        <weather-forecast-card id="test-card-8"></weather-forecast-card>
+      </div>
+      <h3>Weather attributes</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-9"></weather-forecast-card>
+      </div>
+      <h3>Color thresholds</h3>
+      <div class="test-card">
+        <weather-forecast-card
+          id="test-card-color-thresholds"
+        ></weather-forecast-card>
+      </div>
+      <h3>Color thresholds (Fahrenheit)</h3>
+      <div class="test-card">
+        <weather-forecast-card
+          id="test-card-color-thresholds-fahrenheit"
+        ></weather-forecast-card>
+      </div>
+      <h3>Cardinal wind bearing</h3>
+      <div class="test-card">
+        <weather-forecast-card
+          id="test-card-cardinal-wind"
+        ></weather-forecast-card>
+      </div>
+      <h3>Secondary info attribute</h3>
+      <div class="test-card">
+        <weather-forecast-card
+          id="test-card-secondary-info-attribute"
+        ></weather-forecast-card>
+      </div>
+      <h3>12-hour clock</h3>
+      <div class="test-card">
+        <weather-forecast-card
+          id="test-card-12-hour-clock"
+        ></weather-forecast-card>
+      </div>
+      <h3>12-hour clock, chart mode</h3>
+      <div class="test-card">
+        <weather-forecast-card
+          id="test-card-12-hour-clock-chart-mode"
+        ></weather-forecast-card>
+      </div>
+      <h3>Twice daily, simple</h3>
+      <div class="test-card">
+        <weather-forecast-card
+          id="test-card-twice-daily-simple"
+        ></weather-forecast-card>
+      </div>
+      <h3>Twice daily, chart</h3>
+      <div class="test-card">
+        <weather-forecast-card
+          id="test-card-twice-daily-chart"
+        ></weather-forecast-card>
+      </div>
+      <h2>Bug fixes</h2>
+      <h3>#14</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-bug-14"></weather-forecast-card>
+      </div>
+      <h3>#14 - 2</h3>
+      <div class="test-card">
+        <weather-forecast-card id="test-card-bug-14-2"></weather-forecast-card>
+      </div>
+      <div id="error">
+        <p id="error-message"></p>
+      </div>
+    </div>
+    <script type="module" src="../../src/index.ts"></script>
+    <script type="module">
+      import {
+        MockHass,
+        ISSUE_14_DAILY_FORECAST,
+        ISSUE_14_DAILY_FORECAST_2,
+        TEST_FORECAST_HOURLY_CARDINAL_WIND_BEARING,
+        TEST_FORECAST_DAILY_CARDINAL_WIND_BEARING,
+      } from "../mocks/index.ts";
+
+      const initializeCard = (cardId, config, hass) => {
+        const card = document.getElementById(cardId);
+        if (card) {
+          card.setConfig(config);
+          card.hass = hass;
+        } else {
+          console.error(`Card element with id ${cardId} not found`);
+          const errorMessage = document.getElementById("error-message");
+          if (errorMessage) {
+            errorMessage.textContent += `Card element with id ${cardId} not found\n`;
+          }
+        }
+      };
+
+      customElements.whenDefined("weather-forecast-card").then(() => {
+        const mockHass = new MockHass();
+        const hass = mockHass.getHass();
+
+        initializeCard("test-card-1", { entity: "weather.demo" }, hass);
+
+        initializeCard(
+          "test-card-2",
+          {
+            entity: "weather.demo",
+            show_current: false,
+          },
+          hass
+        );
+
+        initializeCard(
+          "test-card-3",
+          {
+            entity: "weather.demo",
+            icons_path: "./resources/img",
+            forecast: {
+              extra_attribute: "precipitation_probability",
+            },
+          },
+          hass
+        );
+
+        initializeCard(
+          "test-card-4",
+          {
+            entity: "weather.demo",
+            temperature_entity: "sensor.temperature_outdoor",
+            forecast: {
+              extra_attribute: "wind_direction",
+            },
+          },
+          hass
+        );
+
+        initializeCard(
+          "test-card-5",
+          {
+            entity: "weather.demo",
+            default_forecast: "hourly",
+            forecast: {
+              mode: "chart",
+              extra_attribute: "wind_direction",
+            },
+          },
+          hass
+        );
+        initializeCard(
+          "test-card-6",
+          {
+            entity: "weather.demo",
+            default_forecast: "hourly",
+            forecast: {
+              mode: "chart",
+              extra_attribute: "wind_direction",
+              hourly_group_size: 3,
+            },
+          },
+          hass
+        );
+        initializeCard(
+          "test-card-7",
+          {
+            entity: "weather.demo",
+            show_condition_effects: true,
+          },
+          hass
+        );
+        initializeCard(
+          "test-card-8",
+          {
+            entity: "weather.demo",
+            show_condition_effects: true,
+          },
+          hass
+        );
+        initializeCard(
+          "test-card-9",
+          {
+            entity: "weather.demo",
+            current: {
+              show_attributes: true,
+            },
+          },
+          hass
+        );
+
+        initializeCard(
+          "test-card-color-thresholds",
+          {
+            entity: "weather.demo",
+            forecast: {
+              mode: "chart",
+              use_color_thresholds: true,
+            },
+          },
+          hass
+        );
+
+        const hassFahrenheit = new MockHass({ unitOfMeasurement: "°F" });
+
+        initializeCard(
+          "test-card-color-thresholds-fahrenheit",
+          {
+            entity: "weather.demo",
+            forecast: {
+              mode: "chart",
+              use_color_thresholds: true,
+            },
+          },
+          hassFahrenheit.getHass()
+        );
+
+        const hassCardinalWind = new MockHass();
+        hassCardinalWind.hourlyForecast =
+          TEST_FORECAST_HOURLY_CARDINAL_WIND_BEARING;
+        hassCardinalWind.dailyForecast =
+          TEST_FORECAST_DAILY_CARDINAL_WIND_BEARING;
+
+        initializeCard(
+          "test-card-cardinal-wind",
+          {
+            entity: "weather.demo",
+            forecast: {
+              mode: "chart",
+              extra_attribute: "wind_direction",
+            },
+          },
+          hassCardinalWind.getHass()
+        );
+
+        initializeCard(
+          "test-card-secondary-info-attribute",
+          {
+            entity: "weather.demo",
+            current: {
+              secondary_info_attribute: "humidity",
+            },
+          },
+          hass
+        );
+
+        const hass12HourClock = new MockHass({ use12HourClock: true });
+
+        initializeCard(
+          "test-card-12-hour-clock",
+          {
+            entity: "weather.demo",
+          },
+          hass12HourClock.getHass()
+        );
+
+        initializeCard(
+          "test-card-12-hour-clock-chart-mode",
+          {
+            entity: "weather.demo",
+            forecast: {
+              mode: "chart",
+              extra_attribute: "wind_direction",
+            },
+          },
+          hass12HourClock.getHass()
+        );
+
+        initializeCard(
+          "test-card-twice-daily-simple",
+          {
+            entity: "weather.demo",
+            forecast: {
+              mode: "simple",
+            },
+          },
+          new MockHass({ supportedFeatures: 6 }).getHass()
+        );
+
+        initializeCard(
+          "test-card-twice-daily-chart",
+          {
+            entity: "weather.demo",
+            forecast: {
+              mode: "chart",
+              extra_attribute: "wind_direction",
+            },
+          },
+          new MockHass({ supportedFeatures: 6 }).getHass()
+        );
+
+        const hassIssue14 = new MockHass();
+        hassIssue14.dailyForecast = ISSUE_14_DAILY_FORECAST;
+
+        initializeCard(
+          "test-card-bug-14",
+          {
+            entity: "weather.demo",
+            forecast: {
+              mode: "chart",
+              extra_attribute: "wind_direction",
+            },
+          },
+          hassIssue14.getHass()
+        );
+
+        const hassIssue14_2 = new MockHass();
+        hassIssue14_2.dailyForecast = ISSUE_14_DAILY_FORECAST_2;
+
+        initializeCard(
+          "test-card-bug-14-2",
+          {
+            entity: "weather.demo",
+            forecast: {
+              mode: "chart",
+              extra_attribute: "wind_direction",
+            },
+          },
+          hassIssue14_2.getHass()
+        );
+      });
+    </script>
+  </body>
+</html>

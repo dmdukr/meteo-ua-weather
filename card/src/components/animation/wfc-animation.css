@@ -1,0 +1,1054 @@
+:host {
+  --sun-size: var(--weather-forecast-card-effects-sun-size, 140px);
+  --sun-spin-duration: var(
+    --weather-forecast-card-effects-sun-spin-duration,
+    100s
+  );
+  --moon-size: var(--weather-forecast-card-effects-moon-size, 80px);
+  --sky-visibility: var(
+    --weather-forecast-card-effects-sky-visibility,
+    visible
+  );
+  /* Fallbacks for iOS 15 / Safari 15 (no color-mix support) */
+  --drop-color-start: transparent;
+  --drop-color-end: var(--rain-color);
+  --drop-height: var(--weather-forecast-card-effects-drop-height, 35px);
+  --drop-width: 1px; /* Set dynamically in TS: 1px rainy, 2px pouring */
+  --drop-start-pos-diff-y: 50px;
+  --snow-glow-color: var(--snow-color);
+  --container-height: 0px; /* Set dynamically in TS */
+
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  box-sizing: border-box;
+  border-radius: var(--ha-card-border-radius, var(--ha-border-radius-lg));
+}
+
+:host(.light) {
+  --sun-color: var(--weather-forecast-card-effects-sun-color, #facc15);
+  --sun-ray-color: var(
+    --weather-forecast-card-effects-sun-ray-color,
+    rgba(253, 224, 71, 0.4)
+  );
+  --sun-ray-opacity: 0.25;
+  --moon-color: var(
+    --weather-forecast-card-effects-moon-color,
+    rgba(220, 220, 230, 1)
+  );
+  --star-color: var(--weather-forecast-card-effects-star-color, #ffffff);
+  --snow-color: var(--weather-forecast-card-effects-snow-color, #cbd5e1);
+  --glow-intensity: 0.9;
+  --rain-color: var(--weather-forecast-card-effects-rain-color, rgba(200, 210, 220, 0.9));
+  --cloud-color: rgba(120, 130, 145, 0.55);
+  --cloud-color-accent: rgba(100, 110, 125, 0.45);
+  --overcast-top: rgba(55, 65, 81, 0.5);
+  --overcast-mid: rgba(31, 41, 55, 0.4);
+  --overcast-bottom: rgba(17, 24, 39, 0.3);
+  --fog-color: rgba(200, 210, 220, 0.35);
+  --fog-sky-color: rgba(160, 170, 180, 0.3);
+  --wind-streak-color: rgba(180, 190, 210, 0.4);
+  --warning-color-start: rgba(245, 158, 11, 0.35);
+  --warning-color-end: rgba(234, 88, 12, 0.2);
+  --hail-color: #e2e8f0;
+
+  --clear-sky-color: var(
+    --weather-forecast-card-effects-clear-sky-color,
+    rgba(30, 130, 230, 0.6)
+  );
+  --clear-sky-accent: var(
+    --weather-forecast-card-effects-clear-sky-accent,
+    rgba(100, 180, 240, 0.45)
+  );
+  --clear-sky-horizon: var(
+    --weather-forecast-card-effects-clear-sky-horizon,
+    rgba(210, 235, 255, 0.3)
+  );
+  --clear-night-sky-color: var(
+    --weather-forecast-card-effects-clear-night-sky-color,
+    rgba(49, 46, 129, 0.7)
+  );
+  --clear-night-sky-accent: var(
+    --weather-forecast-card-effects-clear-night-sky-accent,
+    rgba(88, 28, 135, 0.55)
+  );
+  --clear-night-horizon: var(
+    --weather-forecast-card-effects-clear-night-horizon,
+    rgba(236, 72, 153, 0.4)
+  );
+}
+
+:host(.dark) {
+  --sun-color: var(--weather-forecast-card-effects-sun-color, #fbbf24);
+  --sun-ray-color: var(
+    --weather-forecast-card-effects-sun-ray-color,
+    rgba(251, 191, 36, 0.5)
+  );
+  --sun-ray-opacity: 0.15;
+  --moon-color: var(
+    --weather-forecast-card-effects-moon-color,
+    rgba(220, 220, 230, 1)
+  );
+  --star-color: var(--weather-forecast-card-effects-star-color, #ffffff);
+  --snow-color: var(--weather-forecast-card-effects-snow-color, #ffffff);
+  --glow-intensity: 0.6;
+  --rain-color: var(--weather-forecast-card-effects-rain-color, rgba(200, 210, 220, 0.9));
+  --cloud-color: rgba(60, 65, 80, 0.65);
+  --cloud-color-accent: rgba(45, 50, 65, 0.55);
+  --overcast-top: rgba(55, 65, 81, 0.7);
+  --overcast-mid: rgba(31, 41, 55, 0.6);
+  --overcast-bottom: rgba(17, 24, 39, 0.5);
+  --fog-color: rgba(180, 190, 200, 0.2);
+  --fog-sky-color: rgba(100, 110, 130, 0.4);
+  --wind-streak-color: rgba(200, 210, 230, 0.25);
+  --warning-color-start: rgba(245, 158, 11, 0.3);
+  --warning-color-end: rgba(234, 88, 12, 0.15);
+  --hail-color: #e2e8f0;
+
+  --clear-sky-color: var(
+    --weather-forecast-card-effects-clear-sky-color,
+    rgba(3, 105, 161, 0.8)
+  );
+  --clear-sky-accent: var(
+    --weather-forecast-card-effects-clear-sky-accent,
+    rgba(7, 89, 133, 0.6)
+  );
+  --clear-sky-horizon: var(
+    --weather-forecast-card-effects-clear-sky-horizon,
+    rgba(12, 74, 110, 0.4)
+  );
+  --clear-night-sky-color: var(
+    --weather-forecast-card-effects-clear-night-sky-color,
+    rgba(10, 15, 40, 0.85)
+  );
+  --clear-night-sky-accent: var(
+    --weather-forecast-card-effects-clear-night-sky-accent,
+    rgba(20, 30, 80, 0.6)
+  );
+  --clear-night-horizon: var(
+    --weather-forecast-card-effects-clear-night-horizon,
+    rgba(40, 25, 100, 0.4)
+  );
+}
+
+/* Modern browsers with color-mix support */
+@supports (color: color-mix(in srgb, red, blue)) {
+  :host {
+    --drop-color-start: color-mix(in srgb, var(--rain-color), transparent 100%);
+    --drop-color-end: color-mix(in srgb, var(--rain-color), transparent 40%);
+  }
+}
+
+.snowflake-path {
+  position: absolute;
+  left: var(--pos-x);
+  top: -50px;
+  z-index: 3;
+  transform: rotate(var(--fall-angle, 0deg));
+  transform-origin: top center;
+}
+
+.snowflake {
+  position: absolute;
+  width: var(--flake-size);
+  height: var(--flake-size);
+  opacity: var(--flake-opacity);
+  left: 0;
+  animation: snowflake var(--duration) linear infinite;
+  animation-delay: var(--delay);
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.8));
+}
+
+.raindrop-path {
+  position: absolute;
+  left: var(--pos-x);
+  top: calc(-1 * var(--drop-height) - var(--drop-start-pos-diff-y));
+  z-index: 2;
+  transform: rotate(var(--fall-angle, 0deg));
+  transform-origin: top center;
+}
+
+.raindrop {
+  position: absolute;
+  width: var(--drop-width);
+  height: var(--drop-height);
+  background: linear-gradient(
+    to bottom,
+    var(--drop-color-start),
+    var(--drop-color-end)
+  );
+  border-radius: var(--drop-width);
+  left: 0;
+  top: 0;
+  animation: raindrop var(--duration) linear infinite;
+  animation-delay: var(--delay);
+}
+
+.splat {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 10px;
+  border-top: 2px dotted rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  left: -7.5px;
+  top: calc(var(--landing-pos-y) + var(--drop-height) + 50px - 5px);
+  opacity: 1;
+  transform: scale(0);
+  animation: splat var(--duration) linear infinite;
+  animation-delay: var(--delay);
+}
+
+.hailstone-path {
+  position: absolute;
+  left: var(--pos-x);
+  top: calc(-1 * var(--hail-size) - var(--drop-start-pos-diff-y));
+  z-index: 2;
+  transform: rotate(var(--fall-angle, 0deg));
+  transform-origin: top center;
+}
+
+.hailstone {
+  position: absolute;
+  width: var(--hail-size);
+  height: var(--hail-size);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff, var(--hail-color));
+  opacity: 0.9;
+  left: 0;
+  top: 0;
+  animation: raindrop var(--duration) linear infinite;
+  animation-delay: var(--delay);
+  box-shadow: 0 0 3px rgba(255, 255, 255, 0.4);
+}
+
+.lightning-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  bottom: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+  mix-blend-mode: overlay;
+  animation: lightning-loop 20s infinite;
+}
+
+.sky {
+  position: absolute;
+  visibility: var(--sky-visibility);
+  z-index: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    var(--clear-sky-color) 0%,
+    var(--clear-sky-accent) 55%,
+    var(--clear-sky-horizon) 100%
+  );
+}
+
+.sky::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at 65% 15%,
+    rgba(255, 255, 255, 0.25) 0%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+.sun {
+  position: absolute;
+  top: calc(var(--sun-size) * -0.95);
+  right: 35%;
+  transform: translateX(50%);
+  width: var(--sun-size);
+  height: var(--sun-size);
+  border-radius: 50%;
+  background: #f5fee0;
+  box-shadow:
+    0 0 20px 2px #fff7ed,
+    0 0 40px 10px var(--sun-color),
+    0 0 100px 30px rgba(253, 186, 116, 0.3);
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.1));
+}
+
+.sun-ray {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--sun-ray-color) 50%,
+    transparent 100%
+  );
+  border-radius: 50% 50% 10% 10%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: top center;
+  opacity: var(--sun-ray-opacity);
+  box-shadow: 0 0 15px var(--sun-ray-color);
+}
+
+.ray-box {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--sun-size);
+  animation: spin var(--sun-spin-duration) linear infinite;
+}
+
+.night-sky {
+  position: absolute;
+  visibility: var(--sky-visibility);
+  z-index: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    var(--clear-night-sky-color) 0%,
+    var(--clear-night-sky-accent) 50%,
+    var(--clear-night-horizon) 100%
+  );
+}
+
+.night-sky::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at 70% 20%,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.moon {
+  position: absolute;
+  top: calc(var(--moon-size) * -0.85);
+  right: 30%;
+  transform: translateX(50%);
+  width: var(--moon-size);
+  height: var(--moon-size);
+  border-radius: 50%;
+  background: var(--moon-color);
+  box-shadow:
+    0px 0px 25px 5px rgba(255, 255, 255, 0.2),
+    0px 0px 50px 15px rgba(200, 210, 255, 0.1);
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.1));
+}
+
+.star {
+  position: absolute;
+  background: var(--star-color);
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+  box-shadow: 0 0 3px 1px var(--star-color);
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: var(--star-opacity, 1);
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes snowflake {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  12.5% {
+    transform: translate3d(
+      calc(var(--drift-amplitude, 15px) * 0.707),
+      calc((var(--container-height) + var(--drop-start-pos-diff-y)) * 0.125),
+      0
+    );
+  }
+  25% {
+    transform: translate3d(
+      var(--drift-amplitude, 15px),
+      calc((var(--container-height) + var(--drop-start-pos-diff-y)) * 0.25),
+      0
+    );
+  }
+  37.5% {
+    transform: translate3d(
+      calc(var(--drift-amplitude, 15px) * 0.707),
+      calc((var(--container-height) + var(--drop-start-pos-diff-y)) * 0.375),
+      0
+    );
+  }
+  50% {
+    transform: translate3d(
+      0,
+      calc((var(--container-height) + var(--drop-start-pos-diff-y)) * 0.5),
+      0
+    );
+  }
+  62.5% {
+    transform: translate3d(
+      calc(var(--drift-amplitude, 15px) * -0.707),
+      calc((var(--container-height) + var(--drop-start-pos-diff-y)) * 0.625),
+      0
+    );
+  }
+  75% {
+    transform: translate3d(
+      calc(var(--drift-amplitude, 15px) * -1),
+      calc((var(--container-height) + var(--drop-start-pos-diff-y)) * 0.75),
+      0
+    );
+  }
+  87.5% {
+    transform: translate3d(
+      calc(var(--drift-amplitude, 15px) * -0.707),
+      calc((var(--container-height) + var(--drop-start-pos-diff-y)) * 0.875),
+      0
+    );
+  }
+  100% {
+    opacity: 0.2;
+    transform: translate3d(
+      0,
+      calc(var(--container-height) + var(--drop-start-pos-diff-y)),
+      0
+    );
+  }
+}
+
+@keyframes raindrop {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  65% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+    transform: translate3d(
+      0,
+      calc(var(--landing-pos-y) + var(--drop-start-pos-diff-y)),
+      0
+    );
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(
+      0,
+      calc(var(--landing-pos-y) + var(--drop-start-pos-diff-y)),
+      0
+    );
+  }
+}
+
+@keyframes splat {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  80% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  90% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lightning-loop {
+  /* Long pause (0% to 90%) */
+  0%,
+  90% {
+    opacity: 0;
+  }
+
+  /* FLASH 1: Instant On */
+  90.1% {
+    opacity: 0.7;
+  }
+  90.2% {
+    opacity: 0;
+  } /* Immediate off */
+
+  /* Short Pause */
+  90.3% {
+    opacity: 0;
+  }
+
+  /* FLASH 2: Big Crack (Instant On) */
+  90.4% {
+    opacity: 0.8;
+  }
+  90.7% {
+    opacity: 0.1;
+  } /* Slight fade out for "glow" */
+  91% {
+    opacity: 0;
+  }
+
+  /* Residual Flicker */
+  91.1% {
+    opacity: 0.3;
+  }
+  91.3% {
+    opacity: 0;
+  }
+
+  /* Stay dark until end */
+  100% {
+    opacity: 0;
+  }
+}
+
+
+/* ===== CLOUD BASE + OVERCAST + PARTLY CLOUDY ===== */
+
+.cloud {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--cloud-color);
+  z-index: 1;
+  will-change: transform;
+}
+.cloud::before,
+.cloud::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  background: var(--cloud-color-accent);
+}
+
+/* Overcast clouds (cloudy) */
+.overcast-sky {
+  position: absolute; inset: 0; z-index: 0; border-radius: inherit;
+  background: linear-gradient(180deg, var(--overcast-top) 0%, var(--overcast-mid) 50%, var(--overcast-bottom) 100%);
+}
+
+.overcast-sky-night {
+  position: absolute; inset: 0; z-index: 0; border-radius: inherit;
+  background: linear-gradient(180deg, rgba(15, 15, 35, 0.7) 0%, rgba(25, 25, 50, 0.6) 50%, rgba(35, 35, 65, 0.5) 100%);
+}
+
+.cloud-1 {
+  width: 120px; height: 40px; top: 8%; left: -130px;
+  animation: cloud-drift 35s linear infinite;
+}
+.cloud-1::before { width: 60px; height: 50px; top: -28px; left: 20px; }
+.cloud-1::after { width: 45px; height: 40px; top: -18px; left: 55px; }
+
+.cloud-2 {
+  width: 100px; height: 34px; top: 25%; left: -110px;
+  opacity: 0.8;
+  animation: cloud-drift 45s linear infinite; animation-delay: -12s;
+}
+.cloud-2::before { width: 50px; height: 42px; top: -22px; left: 18px; }
+.cloud-2::after { width: 38px; height: 34px; top: -15px; left: 48px; }
+
+.cloud-3 {
+  width: 80px; height: 28px; top: 42%; left: -90px;
+  opacity: 0.9;
+  animation: cloud-drift 55s linear infinite; animation-delay: -25s;
+}
+.cloud-3::before { width: 40px; height: 34px; top: -18px; left: 14px; }
+.cloud-3::after { width: 30px; height: 28px; top: -12px; left: 38px; }
+
+.cloud-4 {
+  width: 90px; height: 30px; top: 15%; left: -100px;
+  opacity: 0.7;
+  animation: cloud-drift 50s linear infinite; animation-delay: -35s;
+}
+.cloud-4::before { width: 45px; height: 38px; top: -20px; left: 16px; }
+.cloud-4::after { width: 34px; height: 30px; top: -13px; left: 42px; }
+
+/* White cloud override for partlycloudy — soft blurred edges */
+:host(.light) .cloud.cloud-white,
+:host(.dark) .cloud.cloud-white {
+  background: rgba(255, 255, 255, 0.7);
+  filter: blur(6px);
+}
+:host(.light) .cloud.cloud-white::before,
+:host(.light) .cloud.cloud-white::after,
+:host(.dark) .cloud.cloud-white::before,
+:host(.dark) .cloud.cloud-white::after {
+  background: rgba(245, 248, 255, 0.6);
+}
+
+/* Partly cloudy: same cloud shapes, white, 8 clouds at different heights/speeds */
+.cloud-pc-1 {
+  width: 120px; height: 40px; top: 6%; left: -130px;
+  animation: cloud-drift 36s linear infinite;
+}
+.cloud-pc-1::before { width: 60px; height: 50px; top: -28px; left: 20px; }
+.cloud-pc-1::after { width: 45px; height: 40px; top: -18px; left: 55px; }
+
+.cloud-pc-2 {
+  width: 90px; height: 30px; top: 20%; left: -100px;
+  opacity: 0.8;
+  animation: cloud-drift 48s linear infinite; animation-delay: -10s;
+}
+.cloud-pc-2::before { width: 45px; height: 38px; top: -20px; left: 16px; }
+.cloud-pc-2::after { width: 34px; height: 30px; top: -13px; left: 42px; }
+
+.cloud-pc-3 {
+  width: 110px; height: 36px; top: 35%; left: -120px;
+  opacity: 0.7;
+  animation: cloud-drift 42s linear infinite; animation-delay: -22s;
+}
+.cloud-pc-3::before { width: 55px; height: 46px; top: -25px; left: 18px; }
+.cloud-pc-3::after { width: 42px; height: 36px; top: -16px; left: 50px; }
+
+.cloud-pc-4 {
+  width: 75px; height: 26px; top: 12%; left: -85px;
+  opacity: 0.65;
+  animation: cloud-drift 54s linear infinite; animation-delay: -30s;
+}
+.cloud-pc-4::before { width: 38px; height: 32px; top: -17px; left: 12px; }
+.cloud-pc-4::after { width: 28px; height: 24px; top: -11px; left: 35px; }
+
+.cloud-pc-5 {
+  width: 100px; height: 34px; top: 28%; left: -110px;
+  opacity: 0.75;
+  animation: cloud-drift 40s linear infinite; animation-delay: -5s;
+}
+.cloud-pc-5::before { width: 50px; height: 42px; top: -22px; left: 18px; }
+.cloud-pc-5::after { width: 38px; height: 34px; top: -15px; left: 48px; }
+
+.cloud-pc-6 {
+  width: 85px; height: 28px; top: 45%; left: -95px;
+  opacity: 0.85;
+  animation: cloud-drift 58s linear infinite; animation-delay: -18s;
+}
+.cloud-pc-6::before { width: 42px; height: 36px; top: -19px; left: 14px; }
+.cloud-pc-6::after { width: 32px; height: 28px; top: -12px; left: 38px; }
+
+.cloud-pc-7 {
+  width: 95px; height: 32px; top: 8%; left: -105px;
+  opacity: 0.7;
+  animation: cloud-drift 46s linear infinite; animation-delay: -38s;
+}
+.cloud-pc-7::before { width: 48px; height: 40px; top: -22px; left: 16px; }
+.cloud-pc-7::after { width: 36px; height: 32px; top: -14px; left: 44px; }
+
+.cloud-pc-8 {
+  width: 70px; height: 24px; top: 38%; left: -80px;
+  opacity: 0.8;
+  animation: cloud-drift 62s linear infinite; animation-delay: -42s;
+}
+.cloud-pc-8::before { width: 35px; height: 30px; top: -16px; left: 10px; }
+.cloud-pc-8::after { width: 26px; height: 22px; top: -10px; left: 32px; }
+
+
+.cloud-pc-9 {
+  width: 105px; height: 36px; top: 3%; left: -115px;
+  opacity: 0.7;
+  animation: cloud-drift 33s linear infinite; animation-delay: -3s;
+}
+.cloud-pc-9::before { width: 52px; height: 44px; top: -24px; left: 18px; }
+.cloud-pc-9::after { width: 40px; height: 35px; top: -16px; left: 52px; }
+
+.cloud-pc-10 {
+  width: 80px; height: 28px; top: 18%; left: -90px;
+  opacity: 0.6;
+  animation: cloud-drift 51s linear infinite; animation-delay: -15s;
+}
+.cloud-pc-10::before { width: 40px; height: 34px; top: -18px; left: 14px; }
+.cloud-pc-10::after { width: 30px; height: 26px; top: -11px; left: 36px; }
+
+.cloud-pc-11 {
+  width: 115px; height: 38px; top: 30%; left: -125px;
+  opacity: 0.65;
+  animation: cloud-drift 39s linear infinite; animation-delay: -27s;
+}
+.cloud-pc-11::before { width: 58px; height: 48px; top: -26px; left: 22px; }
+.cloud-pc-11::after { width: 44px; height: 38px; top: -17px; left: 56px; }
+
+.cloud-pc-12 {
+  width: 68px; height: 23px; top: 42%; left: -78px;
+  opacity: 0.8;
+  animation: cloud-drift 55s linear infinite; animation-delay: -33s;
+}
+.cloud-pc-12::before { width: 34px; height: 29px; top: -15px; left: 10px; }
+.cloud-pc-12::after { width: 25px; height: 22px; top: -10px; left: 30px; }
+
+.cloud-pc-13 {
+  width: 98px; height: 33px; top: 10%; left: -108px;
+  opacity: 0.7;
+  animation: cloud-drift 43s linear infinite; animation-delay: -45s;
+}
+.cloud-pc-13::before { width: 49px; height: 41px; top: -22px; left: 17px; }
+.cloud-pc-13::after { width: 37px; height: 32px; top: -14px; left: 46px; }
+
+.cloud-pc-14 {
+  width: 88px; height: 30px; top: 25%; left: -98px;
+  opacity: 0.85;
+  animation: cloud-drift 47s linear infinite; animation-delay: -50s;
+}
+.cloud-pc-14::before { width: 44px; height: 37px; top: -20px; left: 15px; }
+.cloud-pc-14::after { width: 33px; height: 29px; top: -12px; left: 41px; }
+
+.cloud-pc-15 {
+  width: 110px; height: 37px; top: 48%; left: -120px;
+  opacity: 0.6;
+  animation: cloud-drift 37s linear infinite; animation-delay: -8s;
+}
+.cloud-pc-15::before { width: 55px; height: 46px; top: -25px; left: 20px; }
+.cloud-pc-15::after { width: 42px; height: 36px; top: -16px; left: 52px; }
+
+.cloud-pc-16 {
+  width: 76px; height: 26px; top: 15%; left: -86px;
+  opacity: 0.65;
+  animation: cloud-drift 53s linear infinite; animation-delay: -20s;
+}
+.cloud-pc-16::before { width: 38px; height: 32px; top: -17px; left: 12px; }
+.cloud-pc-16::after { width: 28px; height: 24px; top: -11px; left: 35px; }
+
+@keyframes cloud-drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(100vw + 260px)); }
+}
+
+
+/* ===== FOG EFFECT — orbital clouds ===== */
+.fog-sky {
+  position: absolute; inset: 0; z-index: 0; border-radius: inherit;
+  background: linear-gradient(180deg, rgba(100,110,130,0.85) 0%, rgba(80,90,110,0.75) 50%, rgba(60,70,90,0.65) 100%);
+}
+
+.fog-sky-night {
+  position: absolute; inset: 0; z-index: 0; border-radius: inherit;
+  background: linear-gradient(180deg, rgba(20,25,45,0.9) 0%, rgba(30,35,55,0.8) 50%, rgba(40,45,65,0.7) 100%);
+}
+
+.fog-orb {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  z-index: 2;
+  will-change: transform;
+  
+}
+
+.fog-orb-1 { width: 687px; height: 238px; animation: fog-orbit-2 21s ease-in-out infinite; opacity: 0.036; animation-delay: -189s; }
+.fog-orb-2 { width: 474px; height: 245px; animation: fog-orbit-3 26s ease-in-out infinite; opacity: 0.011; animation-delay: -173s; }
+.fog-orb-3 { width: 639px; height: 232px; animation: fog-orbit-4 57s ease-in-out infinite reverse; opacity: 0.021; animation-delay: -108s; }
+.fog-orb-4 { width: 407px; height: 265px; animation: fog-orbit-5 34s ease-in-out infinite; opacity: 0.019; animation-delay: -129s; }
+.fog-orb-5 { width: 647px; height: 260px; animation: fog-orbit-6 61s ease-in-out infinite; opacity: 0.039; animation-delay: -179s; }
+.fog-orb-6 { width: 472px; height: 324px; animation: fog-orbit-7 57s ease-in-out infinite reverse; opacity: 0.037; animation-delay: -71s; }
+.fog-orb-7 { width: 363px; height: 404px; animation: fog-orbit-8 30s ease-in-out infinite; opacity: 0.046; animation-delay: -178s; }
+.fog-orb-8 { width: 502px; height: 249px; animation: fog-orbit-1 33s ease-in-out infinite; opacity: 0.013; animation-delay: -195s; }
+.fog-orb-9 { width: 407px; height: 307px; animation: fog-orbit-2 26s ease-in-out infinite reverse; opacity: 0.027; animation-delay: -91s; }
+.fog-orb-10 { width: 669px; height: 277px; animation: fog-orbit-3 22s ease-in-out infinite; opacity: 0.011; animation-delay: -186s; }
+.fog-orb-11 { width: 423px; height: 446px; animation: fog-orbit-4 44s ease-in-out infinite; opacity: 0.019; animation-delay: -20s; }
+.fog-orb-12 { width: 784px; height: 370px; animation: fog-orbit-5 59s ease-in-out infinite reverse; opacity: 0.03; animation-delay: -226s; }
+.fog-orb-13 { width: 655px; height: 259px; animation: fog-orbit-6 24s ease-in-out infinite; opacity: 0.011; animation-delay: -11s; }
+.fog-orb-14 { width: 755px; height: 284px; animation: fog-orbit-7 25s ease-in-out infinite; opacity: 0.018; animation-delay: -218s; }
+.fog-orb-15 { width: 411px; height: 307px; animation: fog-orbit-8 37s ease-in-out infinite reverse; opacity: 0.036; animation-delay: -116s; }
+.fog-orb-16 { width: 546px; height: 251px; animation: fog-orbit-1 43s ease-in-out infinite; opacity: 0.032; animation-delay: -90s; }
+.fog-orb-17 { width: 496px; height: 389px; animation: fog-orbit-2 61s ease-in-out infinite; opacity: 0.019; animation-delay: -18s; }
+.fog-orb-18 { width: 447px; height: 346px; animation: fog-orbit-3 35s ease-in-out infinite reverse; opacity: 0.034; animation-delay: -41s; }
+.fog-orb-19 { width: 498px; height: 446px; animation: fog-orbit-4 60s ease-in-out infinite; opacity: 0.042; animation-delay: -176s; }
+.fog-orb-20 { width: 710px; height: 293px; animation: fog-orbit-5 23s ease-in-out infinite; opacity: 0.01; animation-delay: -58s; }
+.fog-orb-21 { width: 772px; height: 290px; animation: fog-orbit-6 45s ease-in-out infinite reverse; opacity: 0.042; animation-delay: -68s; }
+.fog-orb-22 { width: 827px; height: 355px; animation: fog-orbit-7 40s ease-in-out infinite; opacity: 0.038; animation-delay: -54s; }
+.fog-orb-23 { width: 562px; height: 436px; animation: fog-orbit-8 61s ease-in-out infinite; opacity: 0.024; animation-delay: -117s; }
+.fog-orb-24 { width: 431px; height: 273px; animation: fog-orbit-1 55s ease-in-out infinite reverse; opacity: 0.016; animation-delay: -137s; }
+.fog-orb-25 { width: 659px; height: 319px; animation: fog-orbit-2 57s ease-in-out infinite; opacity: 0.048; animation-delay: -102s; }
+.fog-orb-26 { width: 430px; height: 340px; animation: fog-orbit-3 51s ease-in-out infinite; opacity: 0.023; animation-delay: -23s; }
+.fog-orb-27 { width: 800px; height: 238px; animation: fog-orbit-4 29s ease-in-out infinite reverse; opacity: 0.014; animation-delay: -160s; }
+.fog-orb-28 { width: 708px; height: 318px; animation: fog-orbit-5 58s ease-in-out infinite; opacity: 0.014; animation-delay: -16s; }
+.fog-orb-29 { width: 665px; height: 329px; animation: fog-orbit-6 53s ease-in-out infinite; opacity: 0.044; animation-delay: -64s; }
+.fog-orb-30 { width: 800px; height: 212px; animation: fog-orbit-7 27s ease-in-out infinite reverse; opacity: 0.034; animation-delay: -174s; }
+.fog-orb-31 { width: 744px; height: 278px; animation: fog-orbit-8 61s ease-in-out infinite; opacity: 0.042; animation-delay: -87s; }
+.fog-orb-32 { width: 582px; height: 250px; animation: fog-orbit-1 49s ease-in-out infinite; opacity: 0.039; animation-delay: 0s; }
+.fog-orb-33 { width: 808px; height: 394px; animation: fog-orbit-2 36s ease-in-out infinite reverse; opacity: 0.031; animation-delay: -128s; }
+.fog-orb-34 { width: 619px; height: 443px; animation: fog-orbit-3 26s ease-in-out infinite; opacity: 0.049; animation-delay: -222s; }
+.fog-orb-35 { width: 790px; height: 373px; animation: fog-orbit-4 52s ease-in-out infinite; opacity: 0.025; animation-delay: -155s; }
+.fog-orb-36 { width: 551px; height: 405px; animation: fog-orbit-5 30s ease-in-out infinite reverse; opacity: 0.032; animation-delay: -138s; }
+.fog-orb-37 { width: 832px; height: 345px; animation: fog-orbit-6 20s ease-in-out infinite; opacity: 0.043; animation-delay: -153s; }
+.fog-orb-38 { width: 369px; height: 238px; animation: fog-orbit-7 43s ease-in-out infinite; opacity: 0.035; animation-delay: -224s; }
+.fog-orb-39 { width: 773px; height: 288px; animation: fog-orbit-8 35s ease-in-out infinite reverse; opacity: 0.044; animation-delay: -14s; }
+.fog-orb-40 { width: 650px; height: 230px; animation: fog-orbit-1 25s ease-in-out infinite; opacity: 0.033; animation-delay: -187s; }
+.fog-orb-41 { width: 395px; height: 404px; animation: fog-orbit-2 54s ease-in-out infinite; opacity: 0.038; animation-delay: -196s; }
+.fog-orb-42 { width: 697px; height: 331px; animation: fog-orbit-3 55s ease-in-out infinite reverse; opacity: 0.012; animation-delay: -42s; }
+.fog-orb-43 { width: 806px; height: 365px; animation: fog-orbit-4 47s ease-in-out infinite; opacity: 0.019; animation-delay: -54s; }
+.fog-orb-44 { width: 746px; height: 396px; animation: fog-orbit-5 32s ease-in-out infinite; opacity: 0.022; animation-delay: -182s; }
+.fog-orb-45 { width: 703px; height: 376px; animation: fog-orbit-6 43s ease-in-out infinite reverse; opacity: 0.013; animation-delay: -112s; }
+.fog-orb-46 { width: 591px; height: 240px; animation: fog-orbit-7 35s ease-in-out infinite; opacity: 0.019; animation-delay: -57s; }
+.fog-orb-47 { width: 370px; height: 360px; animation: fog-orbit-8 55s ease-in-out infinite; opacity: 0.014; animation-delay: -58s; }
+.fog-orb-48 { width: 363px; height: 228px; animation: fog-orbit-1 60s ease-in-out infinite reverse; opacity: 0.021; animation-delay: -15s; }
+.fog-orb-49 { width: 823px; height: 218px; animation: fog-orbit-2 41s ease-in-out infinite; opacity: 0.035; animation-delay: -18s; }
+.fog-orb-50 { width: 502px; height: 381px; animation: fog-orbit-3 51s ease-in-out infinite; opacity: 0.025; animation-delay: -54s; }
+.fog-orb-51 { width: 730px; height: 449px; animation: fog-orbit-4 56s ease-in-out infinite reverse; opacity: 0.025; animation-delay: -147s; }
+.fog-orb-52 { width: 761px; height: 331px; animation: fog-orbit-5 46s ease-in-out infinite; opacity: 0.018; animation-delay: -48s; }
+.fog-orb-53 { width: 697px; height: 320px; animation: fog-orbit-6 42s ease-in-out infinite; opacity: 0.021; animation-delay: -108s; }
+.fog-orb-54 { width: 802px; height: 396px; animation: fog-orbit-7 23s ease-in-out infinite reverse; opacity: 0.047; animation-delay: -172s; }
+.fog-orb-55 { width: 690px; height: 235px; animation: fog-orbit-8 23s ease-in-out infinite; opacity: 0.036; animation-delay: -103s; }
+.fog-orb-56 { width: 769px; height: 430px; animation: fog-orbit-1 26s ease-in-out infinite; opacity: 0.034; animation-delay: -63s; }
+.fog-orb-57 { width: 634px; height: 324px; animation: fog-orbit-2 28s ease-in-out infinite reverse; opacity: 0.017; animation-delay: -108s; }
+.fog-orb-58 { width: 596px; height: 273px; animation: fog-orbit-3 24s ease-in-out infinite; opacity: 0.039; animation-delay: -113s; }
+.fog-orb-59 { width: 798px; height: 350px; animation: fog-orbit-4 26s ease-in-out infinite; opacity: 0.017; animation-delay: -12s; }
+.fog-orb-60 { width: 636px; height: 424px; animation: fog-orbit-5 20s ease-in-out infinite reverse; opacity: 0.025; animation-delay: -23s; }
+.fog-orb-61 { width: 794px; height: 270px; animation: fog-orbit-6 30s ease-in-out infinite; opacity: 0.05; animation-delay: -104s; }
+.fog-orb-62 { width: 469px; height: 431px; animation: fog-orbit-7 45s ease-in-out infinite; opacity: 0.036; animation-delay: -231s; }
+.fog-orb-63 { width: 554px; height: 210px; animation: fog-orbit-8 44s ease-in-out infinite reverse; opacity: 0.032; animation-delay: -67s; }
+.fog-orb-64 { width: 761px; height: 326px; animation: fog-orbit-1 38s ease-in-out infinite; opacity: 0.037; animation-delay: -108s; }
+.fog-orb-65 { width: 734px; height: 410px; animation: fog-orbit-2 55s ease-in-out infinite; opacity: 0.044; animation-delay: -169s; }
+.fog-orb-66 { width: 439px; height: 258px; animation: fog-orbit-3 38s ease-in-out infinite reverse; opacity: 0.041; animation-delay: -55s; }
+.fog-orb-67 { width: 656px; height: 398px; animation: fog-orbit-4 54s ease-in-out infinite; opacity: 0.019; animation-delay: -15s; }
+.fog-orb-68 { width: 389px; height: 222px; animation: fog-orbit-5 57s ease-in-out infinite; opacity: 0.011; animation-delay: -122s; }
+.fog-orb-69 { width: 796px; height: 345px; animation: fog-orbit-6 30s ease-in-out infinite reverse; opacity: 0.023; animation-delay: -14s; }
+.fog-orb-70 { width: 401px; height: 427px; animation: fog-orbit-7 31s ease-in-out infinite; opacity: 0.021; animation-delay: -17s; }
+.fog-orb-71 { width: 705px; height: 430px; animation: fog-orbit-8 35s ease-in-out infinite; opacity: 0.018; animation-delay: -103s; }
+.fog-orb-72 { width: 815px; height: 355px; animation: fog-orbit-1 35s ease-in-out infinite reverse; opacity: 0.048; animation-delay: -148s; }
+.fog-orb-73 { width: 677px; height: 230px; animation: fog-orbit-2 46s ease-in-out infinite; opacity: 0.045; animation-delay: -168s; }
+.fog-orb-74 { width: 627px; height: 290px; animation: fog-orbit-3 36s ease-in-out infinite; opacity: 0.023; animation-delay: -52s; }
+.fog-orb-75 { width: 520px; height: 271px; animation: fog-orbit-4 36s ease-in-out infinite reverse; opacity: 0.036; animation-delay: -101s; }
+.fog-orb-76 { width: 690px; height: 286px; animation: fog-orbit-5 49s ease-in-out infinite; opacity: 0.026; animation-delay: -80s; }
+.fog-orb-77 { width: 839px; height: 228px; animation: fog-orbit-6 20s ease-in-out infinite; opacity: 0.047; animation-delay: -117s; }
+.fog-orb-78 { width: 648px; height: 235px; animation: fog-orbit-7 24s ease-in-out infinite reverse; opacity: 0.028; animation-delay: -137s; }
+.fog-orb-79 { width: 495px; height: 243px; animation: fog-orbit-8 42s ease-in-out infinite; opacity: 0.021; animation-delay: -225s; }
+.fog-orb-80 { width: 485px; height: 304px; animation: fog-orbit-1 38s ease-in-out infinite; opacity: 0.02; animation-delay: -40s; }
+.fog-orb-81 { width: 638px; height: 390px; animation: fog-orbit-2 39s ease-in-out infinite reverse; opacity: 0.032; animation-delay: -156s; }
+.fog-orb-82 { width: 773px; height: 377px; animation: fog-orbit-3 53s ease-in-out infinite; opacity: 0.021; animation-delay: -2s; }
+.fog-orb-83 { width: 643px; height: 286px; animation: fog-orbit-4 26s ease-in-out infinite; opacity: 0.033; animation-delay: -240s; }
+.fog-orb-84 { width: 495px; height: 239px; animation: fog-orbit-5 26s ease-in-out infinite reverse; opacity: 0.046; animation-delay: -190s; }
+.fog-orb-85 { width: 499px; height: 282px; animation: fog-orbit-6 58s ease-in-out infinite; opacity: 0.026; animation-delay: -53s; }
+.fog-orb-86 { width: 464px; height: 385px; animation: fog-orbit-7 60s ease-in-out infinite; opacity: 0.019; animation-delay: -218s; }
+.fog-orb-87 { width: 610px; height: 274px; animation: fog-orbit-8 23s ease-in-out infinite reverse; opacity: 0.05; animation-delay: -23s; }
+.fog-orb-88 { width: 784px; height: 280px; animation: fog-orbit-1 22s ease-in-out infinite; opacity: 0.03; animation-delay: 0s; }
+.fog-orb-89 { width: 426px; height: 373px; animation: fog-orbit-2 36s ease-in-out infinite; opacity: 0.014; animation-delay: -41s; }
+.fog-orb-90 { width: 642px; height: 390px; animation: fog-orbit-3 47s ease-in-out infinite reverse; opacity: 0.012; animation-delay: -143s; }
+.fog-orb-91 { width: 398px; height: 436px; animation: fog-orbit-4 29s ease-in-out infinite; opacity: 0.014; animation-delay: -139s; }
+.fog-orb-92 { width: 549px; height: 359px; animation: fog-orbit-5 55s ease-in-out infinite; opacity: 0.035; animation-delay: -37s; }
+.fog-orb-93 { width: 381px; height: 288px; animation: fog-orbit-6 43s ease-in-out infinite reverse; opacity: 0.042; animation-delay: -230s; }
+.fog-orb-94 { width: 800px; height: 220px; animation: fog-orbit-7 42s ease-in-out infinite; opacity: 0.027; animation-delay: -53s; }
+.fog-orb-95 { width: 701px; height: 236px; animation: fog-orbit-8 42s ease-in-out infinite; opacity: 0.013; animation-delay: -199s; }
+.fog-orb-96 { width: 807px; height: 314px; animation: fog-orbit-1 59s ease-in-out infinite reverse; opacity: 0.025; animation-delay: -191s; }
+.fog-orb-97 { width: 836px; height: 270px; animation: fog-orbit-2 30s ease-in-out infinite; opacity: 0.05; animation-delay: -204s; }
+.fog-orb-98 { width: 811px; height: 315px; animation: fog-orbit-3 21s ease-in-out infinite; opacity: 0.031; animation-delay: -45s; }
+.fog-orb-99 { width: 530px; height: 410px; animation: fog-orbit-4 46s ease-in-out infinite reverse; opacity: 0.049; animation-delay: -205s; }
+.fog-orb-100 { width: 736px; height: 417px; animation: fog-orbit-5 35s ease-in-out infinite; opacity: 0.044; animation-delay: -68s; }
+.fog-orb-101 { width: 719px; height: 237px; animation: fog-orbit-6 44s ease-in-out infinite; opacity: 0.01; animation-delay: -223s; }
+.fog-orb-102 { width: 600px; height: 266px; animation: fog-orbit-7 32s ease-in-out infinite reverse; opacity: 0.039; animation-delay: -209s; }
+.fog-orb-103 { width: 539px; height: 288px; animation: fog-orbit-8 34s ease-in-out infinite; opacity: 0.037; animation-delay: -57s; }
+.fog-orb-104 { width: 458px; height: 312px; animation: fog-orbit-1 41s ease-in-out infinite; opacity: 0.031; animation-delay: -71s; }
+.fog-orb-105 { width: 755px; height: 281px; animation: fog-orbit-2 42s ease-in-out infinite reverse; opacity: 0.021; animation-delay: -164s; }
+.fog-orb-106 { width: 707px; height: 425px; animation: fog-orbit-3 54s ease-in-out infinite; opacity: 0.036; animation-delay: -84s; }
+.fog-orb-107 { width: 419px; height: 434px; animation: fog-orbit-4 36s ease-in-out infinite; opacity: 0.014; animation-delay: -45s; }
+.fog-orb-108 { width: 495px; height: 219px; animation: fog-orbit-5 26s ease-in-out infinite reverse; opacity: 0.027; animation-delay: -152s; }
+.fog-orb-109 { width: 733px; height: 411px; animation: fog-orbit-6 40s ease-in-out infinite; opacity: 0.028; animation-delay: -111s; }
+.fog-orb-110 { width: 621px; height: 239px; animation: fog-orbit-7 44s ease-in-out infinite; opacity: 0.048; animation-delay: -230s; }
+.fog-orb-111 { width: 490px; height: 221px; animation: fog-orbit-8 47s ease-in-out infinite reverse; opacity: 0.045; animation-delay: 0s; }
+.fog-orb-112 { width: 772px; height: 347px; animation: fog-orbit-1 32s ease-in-out infinite; opacity: 0.021; animation-delay: -93s; }
+.fog-orb-113 { width: 700px; height: 445px; animation: fog-orbit-2 41s ease-in-out infinite; opacity: 0.03; animation-delay: -159s; }
+.fog-orb-114 { width: 794px; height: 241px; animation: fog-orbit-3 39s ease-in-out infinite reverse; opacity: 0.017; animation-delay: -129s; }
+.fog-orb-115 { width: 569px; height: 293px; animation: fog-orbit-4 45s ease-in-out infinite; opacity: 0.047; animation-delay: -178s; }
+.fog-orb-116 { width: 425px; height: 259px; animation: fog-orbit-5 46s ease-in-out infinite; opacity: 0.045; animation-delay: -170s; }
+.fog-orb-117 { width: 706px; height: 401px; animation: fog-orbit-6 31s ease-in-out infinite reverse; opacity: 0.022; animation-delay: -157s; }
+.fog-orb-118 { width: 567px; height: 350px; animation: fog-orbit-7 20s ease-in-out infinite; opacity: 0.036; animation-delay: -77s; }
+.fog-orb-119 { width: 580px; height: 411px; animation: fog-orbit-8 57s ease-in-out infinite; opacity: 0.034; animation-delay: -155s; }
+.fog-orb-120 { width: 598px; height: 323px; animation: fog-orbit-1 48s ease-in-out infinite reverse; opacity: 0.016; animation-delay: -172s; }
+.fog-orb-121 { width: 602px; height: 413px; animation: fog-orbit-2 30s ease-in-out infinite; opacity: 0.041; animation-delay: -168s; }
+.fog-orb-122 { width: 623px; height: 379px; animation: fog-orbit-3 60s ease-in-out infinite; opacity: 0.032; animation-delay: -158s; }
+.fog-orb-123 { width: 779px; height: 402px; animation: fog-orbit-4 35s ease-in-out infinite reverse; opacity: 0.041; animation-delay: -172s; }
+.fog-orb-124 { width: 772px; height: 260px; animation: fog-orbit-5 29s ease-in-out infinite; opacity: 0.031; animation-delay: -6s; }
+.fog-orb-125 { width: 603px; height: 366px; animation: fog-orbit-6 24s ease-in-out infinite; opacity: 0.01; animation-delay: -116s; }
+.fog-orb-126 { width: 682px; height: 357px; animation: fog-orbit-7 32s ease-in-out infinite reverse; opacity: 0.023; animation-delay: -183s; }
+.fog-orb-127 { width: 613px; height: 312px; animation: fog-orbit-8 35s ease-in-out infinite; opacity: 0.011; animation-delay: -37s; }
+.fog-orb-128 { width: 362px; height: 438px; animation: fog-orbit-1 26s ease-in-out infinite; opacity: 0.047; animation-delay: -199s; }
+.fog-orb-129 { width: 450px; height: 415px; animation: fog-orbit-2 53s ease-in-out infinite reverse; opacity: 0.045; animation-delay: -118s; }
+.fog-orb-130 { width: 487px; height: 444px; animation: fog-orbit-3 27s ease-in-out infinite; opacity: 0.043; animation-delay: -116s; }
+.fog-orb-131 { width: 597px; height: 380px; animation: fog-orbit-4 53s ease-in-out infinite; opacity: 0.022; animation-delay: -143s; }
+.fog-orb-132 { width: 746px; height: 438px; animation: fog-orbit-5 48s ease-in-out infinite reverse; opacity: 0.012; animation-delay: -156s; }
+.fog-orb-133 { width: 816px; height: 339px; animation: fog-orbit-6 47s ease-in-out infinite; opacity: 0.045; animation-delay: -212s; }
+.fog-orb-134 { width: 588px; height: 439px; animation: fog-orbit-7 30s ease-in-out infinite; opacity: 0.048; animation-delay: -190s; }
+.fog-orb-135 { width: 590px; height: 276px; animation: fog-orbit-8 35s ease-in-out infinite reverse; opacity: 0.013; animation-delay: -215s; }
+
+@keyframes fog-orbit-1 {
+  0%   { top: -10%; left: -15%; }
+  25%  { top: 20%; left: 55%; }
+  50%  { top: 45%; left: 25%; }
+  75%  { top: 15%; left: -10%; }
+  100% { top: -10%; left: -15%; }
+}
+@keyframes fog-orbit-2 {
+  0%   { top: 55%; left: 65%; }
+  25%  { top: 10%; left: 35%; }
+  50%  { top: -10%; left: 5%; }
+  75%  { top: 35%; left: 50%; }
+  100% { top: 55%; left: 65%; }
+}
+@keyframes fog-orbit-3 {
+  0%   { top: 30%; left: -20%; }
+  25%  { top: 5%; left: 40%; }
+  50%  { top: 40%; left: 60%; }
+  75%  { top: 60%; left: 15%; }
+  100% { top: 30%; left: -20%; }
+}
+@keyframes fog-orbit-4 {
+  0%   { top: 65%; left: 45%; }
+  25%  { top: 40%; left: -10%; }
+  50%  { top: 10%; left: 30%; }
+  75%  { top: 50%; left: 65%; }
+  100% { top: 65%; left: 45%; }
+}
+@keyframes fog-orbit-5 {
+  0%   { top: -5%; left: 35%; }
+  25%  { top: 35%; left: 70%; }
+  50%  { top: 60%; left: 35%; }
+  75%  { top: 30%; left: 0%; }
+  100% { top: -5%; left: 35%; }
+}
+@keyframes fog-orbit-6 {
+  0%   { top: 50%; left: 5%; }
+  25%  { top: 20%; left: 45%; }
+  50%  { top: -5%; left: 60%; }
+  75%  { top: 40%; left: 25%; }
+  100% { top: 50%; left: 5%; }
+}
+@keyframes fog-orbit-7 {
+  0%   { top: 15%; left: 70%; }
+  25%  { top: 45%; left: 30%; }
+  50%  { top: 25%; left: -10%; }
+  75%  { top: -5%; left: 50%; }
+  100% { top: 15%; left: 70%; }
+}
+@keyframes fog-orbit-8 {
+  0%   { top: 70%; left: 20%; }
+  25%  { top: 30%; left: 60%; }
+  50%  { top: 5%; left: 20%; }
+  75%  { top: 55%; left: -5%; }
+  100% { top: 70%; left: 20%; }
+}
+
+/* ===== WIND EFFECT ===== */
+.wind-streak {
+  position: absolute;
+  height: 6px;
+  background: radial-gradient(ellipse 50% 50% at center, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.6) 40%, transparent 100%);
+  border-radius: 50%;
+  z-index: 2;
+  will-change: transform;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+
+.wind-streak-1 { width: 140px; top: 5%; left: -150px; opacity: 0.8; animation: wind-blow 3s linear infinite; }
+.wind-streak-2 { width: 100px; top: 12%; left: -110px; opacity: 0.7; animation: wind-blow 4s linear infinite; animation-delay: -1s; }
+.wind-streak-3 { width: 170px; top: 20%; left: -180px; opacity: 0.9; animation: wind-blow 2.5s linear infinite; animation-delay: -2s; }
+.wind-streak-4 { width: 90px; top: 28%; left: -100px; opacity: 0.65; animation: wind-blow 4.5s linear infinite; animation-delay: -0.5s; }
+.wind-streak-5 { width: 130px; top: 35%; left: -140px; opacity: 0.75; animation: wind-blow 3.5s linear infinite; animation-delay: -3s; }
+.wind-streak-6 { width: 110px; top: 8%; left: -120px; opacity: 0.7; animation: wind-blow 3.8s linear infinite; animation-delay: -1.5s; }
+.wind-streak-7 { width: 150px; top: 42%; left: -160px; opacity: 0.85; animation: wind-blow 2.8s linear infinite; animation-delay: -2.5s; }
+.wind-streak-8 { width: 120px; top: 18%; left: -130px; opacity: 0.7; animation: wind-blow 3.2s linear infinite; animation-delay: -4s; }
+
+@keyframes wind-blow {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(100vw + 200px)); }
+}
+
+/* ===== WIND LEAVES ===== */
+:host(.light),
+:host(.dark) {
+  --leaf-color: rgba(255, 255, 255, 0.95);
+  --leaf-vein: rgba(220, 225, 235, 0.8);
+}
+
+.wind-leaf {
+  position: absolute;
+  left: -40px;
+  z-index: 2;
+  pointer-events: none;
+  animation: leaf-fly var(--leaf-duration) linear infinite;
+  animation-delay: var(--leaf-delay);
+}
+
+.wind-leaf-svg {
+  width: var(--leaf-size);
+  height: var(--leaf-size);
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+  animation: leaf-tumble var(--leaf-spin) ease-in-out infinite;
+}
+
+@keyframes leaf-fly {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  25% {
+    transform: translateX(calc(25vw + 30px)) translateY(-15px);
+  }
+  50% {
+    transform: translateX(calc(50vw + 60px)) translateY(10px);
+  }
+  75% {
+    transform: translateX(calc(75vw + 90px)) translateY(-8px);
+  }
+  100% {
+    transform: translateX(calc(100vw + 120px)) translateY(5px);
+  }
+}
+
+@keyframes leaf-tumble {
+  0% { transform: rotate(0deg) scaleX(1); }
+  25% { transform: rotate(120deg) scaleX(0.6); }
+  50% { transform: rotate(200deg) scaleX(-0.8); }
+  75% { transform: rotate(310deg) scaleX(0.5); }
+  100% { transform: rotate(360deg) scaleX(1); }
+}
+
+/* ===== WARNING EFFECT (exceptional) ===== */
+.warning-overlay {
+  position: absolute; inset: 0; z-index: 0; border-radius: inherit;
+  background: linear-gradient(180deg, var(--warning-color-start) 0%, var(--warning-color-end) 100%);
+  animation: warning-pulse 3s ease-in-out infinite;
+}
+
+@keyframes warning-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}

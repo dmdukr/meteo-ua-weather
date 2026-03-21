@@ -1,0 +1,258 @@
+import { CARDINAL_DIRECTIONS, ForecastAttribute } from "../../src/data/weather";
+import { random } from "../../src/helpers";
+
+/**
+ * Mock data for regression testing.
+ */
+export const ISSUE_14_DAILY_FORECAST: ForecastAttribute[] = [
+  {
+    datetime: new Date().toISOString(),
+    temperature: 7.2,
+    templow: 3.2,
+    condition: "cloudy",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 4.5,
+    wind_bearing: 180,
+    humidity: 60,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 86400000).toISOString(),
+    temperature: 8.0,
+    templow: 2.0,
+    condition: "sunny",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 3.2,
+    wind_bearing: 200,
+    humidity: 55,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 2 * 86400000).toISOString(),
+    temperature: 5.4,
+    templow: -0.5,
+    condition: "cloudy",
+    precipitation: 0,
+    precipitation_probability: 20,
+    wind_speed: 5.1,
+    wind_bearing: 160,
+    humidity: 65,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 3 * 86400000).toISOString(),
+    temperature: 7.3,
+    templow: -0.8,
+    condition: "sunny",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 4.8,
+    wind_bearing: 190,
+    humidity: 50,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 4 * 86400000).toISOString(),
+    temperature: 8.8,
+    templow: 3.0,
+    condition: "sunny",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 3.5,
+    wind_bearing: 210,
+    humidity: 45,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 5 * 86400000).toISOString(),
+    temperature: 10.4,
+    templow: 6.1,
+    condition: "sunny",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 4.0,
+    wind_bearing: 220,
+    humidity: 40,
+    is_daytime: true,
+  },
+];
+
+export const ISSUE_14_DAILY_FORECAST_2: ForecastAttribute[] = [
+  {
+    datetime: new Date().toISOString(),
+    temperature: 4.8,
+    templow: -6.9,
+    condition: "partlycloudy",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 6,
+    wind_bearing: 180,
+    humidity: 60,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 86400000).toISOString(),
+    temperature: 5.3,
+    templow: -2.2,
+    condition: "sunny",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 6,
+    wind_bearing: 180,
+    humidity: 55,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 2 * 86400000).toISOString(),
+    temperature: 8.4,
+    templow: 2.5,
+    condition: "cloudy",
+    precipitation: 5.6,
+    precipitation_probability: 80,
+    wind_speed: 8,
+    wind_bearing: 200,
+    humidity: 70,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 3 * 86400000).toISOString(),
+    temperature: 10.2,
+    templow: 0.2,
+    condition: "partlycloudy",
+    precipitation: 0,
+    precipitation_probability: 10,
+    wind_speed: 5,
+    wind_bearing: 190,
+    humidity: 60,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 4 * 86400000).toISOString(),
+    temperature: 10.0,
+    templow: 4.2,
+    condition: "rainy",
+    precipitation: 2.0,
+    precipitation_probability: 60,
+    wind_speed: 7,
+    wind_bearing: 210,
+    humidity: 75,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 5 * 86400000).toISOString(),
+    temperature: 10.0,
+    templow: -1.0,
+    condition: "sunny",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 10,
+    wind_bearing: 180,
+    humidity: 50,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 6 * 86400000).toISOString(),
+    temperature: 6.1,
+    templow: -2.9,
+    condition: "cloudy",
+    precipitation: 0,
+    precipitation_probability: 10,
+    wind_speed: 3,
+    wind_bearing: 160,
+    humidity: 60,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 7 * 86400000).toISOString(),
+    temperature: 4.5,
+    templow: -7.9,
+    condition: "partlycloudy",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 4,
+    wind_bearing: 180,
+    humidity: 55,
+    is_daytime: true,
+  },
+  {
+    datetime: new Date(Date.now() + 8 * 86400000).toISOString(),
+    temperature: -3.1,
+    templow: -12.8,
+    condition: "cloudy",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: 10,
+    wind_bearing: 350,
+    humidity: 45,
+    is_daytime: true,
+  },
+];
+
+export const TEST_FORECAST_DAILY: ForecastAttribute[] = Array.from(
+  { length: 5 },
+  (_, i) => ({
+    datetime: new Date(Date.now() + i * 86400000).toISOString(),
+    temperature: random(15, 25),
+    templow: random(5, 15),
+    condition: i % 2 === 0 ? "sunny" : "cloudy",
+    precipitation: 0,
+    precipitation_probability: 0,
+    wind_speed: random(0, 15),
+    wind_bearing: random(0, 360),
+    humidity: 50,
+    is_daytime: true,
+  })
+);
+
+export const TEST_FORECAST_HOURLY: ForecastAttribute[] = Array.from(
+  { length: 3 * 24 },
+  (_, i) => ({
+    datetime: new Date(Date.now() + i * 3600000).toISOString(),
+    temperature: random(15, 25),
+    condition: i % 3 === 0 ? "sunny" : i % 3 === 1 ? "cloudy" : "rainy",
+    precipitation: i % 3 === 2 ? 5 : 0,
+    precipitation_probability: i % 3 === 2 ? 60 : 0,
+    wind_speed: random(0, 15),
+    wind_bearing: random(0, 360),
+    humidity: 60,
+    is_daytime: true,
+  })
+);
+
+const celsiusToFahrenheit = (celsius: number) => (celsius * 9) / 5 + 32;
+
+export const TEST_FORECAST_DAILY_FAHRENHEIT: ForecastAttribute[] =
+  ISSUE_14_DAILY_FORECAST.map((entry) => ({
+    ...entry,
+    temperature: celsiusToFahrenheit(entry.temperature),
+    templow:
+      entry.templow !== undefined && entry.templow !== null
+        ? celsiusToFahrenheit(entry.templow)
+        : entry.templow,
+  }));
+
+export const TEST_FORECAST_HOURLY_FAHRENHEIT: ForecastAttribute[] =
+  TEST_FORECAST_HOURLY.map((entry) => ({
+    ...entry,
+    temperature: celsiusToFahrenheit(entry.temperature),
+  }));
+
+export const TEST_FORECAST_DAILY_CARDINAL_WIND_BEARING: ForecastAttribute[] =
+  TEST_FORECAST_DAILY.map((entry) => ({
+    ...entry,
+    wind_bearing:
+      CARDINAL_DIRECTIONS[
+        Math.floor(Math.random() * CARDINAL_DIRECTIONS.length)
+      ],
+  }));
+
+export const TEST_FORECAST_HOURLY_CARDINAL_WIND_BEARING: ForecastAttribute[] =
+  TEST_FORECAST_HOURLY.map((entry) => ({
+    ...entry,
+    wind_bearing:
+      CARDINAL_DIRECTIONS[
+        Math.floor(Math.random() * CARDINAL_DIRECTIONS.length)
+      ],
+  }));

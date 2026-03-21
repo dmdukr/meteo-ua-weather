@@ -1,0 +1,63 @@
+{
+  "name": "weather-forecast-card",
+  "version": "1.0.1",
+  "description": "A TypeScript weather forecast card built with Parcel",
+  "author": "troinine",
+  "license": "MIT",
+  "keywords": [
+    "home-assistant",
+    "weather-forecast",
+    "weather-card",
+    "weather-forecast-card",
+    "home-assistant-frontend",
+    "custom-card"
+  ],
+  "type": "module",
+  "module": "dist/weather-forecast-card.js",
+  "targets": {
+    "module": {
+      "distDir": "./dist",
+      "source": [
+        "src/index.ts"
+      ],
+      "optimize": true,
+      "publicUrl": "/hacsfiles/ha-weather-forecast-card/",
+      "includeNodeModules": true
+    }
+  },
+  "scripts": {
+    "dev": "parcel serve test/app/index.html test/app/resources/img/*.svg --open",
+    "build": "parcel build --no-source-maps --target module",
+    "build:debug": "parcel build --target module --no-optimize",
+    "clean": "rm -rf ./dist/ ./.parcel-cache",
+    "demo": "parcel serve demo/index.html demo/background.png",
+    "lint": "eslint 'src/**/*.ts'",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1",
+    "chartjs-plugin-datalabels": "^2.2.0",
+    "custom-card-helpers": "^1.9.0",
+    "home-assistant-js-websocket": "^9.5.0",
+    "lit": "^3.1.0",
+    "memoize-one": "^6.0.0",
+    "suncalc": "^1.9.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@mdi/js": "^7.4.47",
+    "@open-wc/testing": "^4.0.0",
+    "@parcel/transformer-inline-string": "^2.16.3",
+    "@types/node": "^20.10.0",
+    "@types/suncalc": "^1.9.2",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "happy-dom": "^20.0.11",
+    "parcel": "^2.16.1",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.50.0",
+    "vitest": "^4.0.16"
+  }
+}
