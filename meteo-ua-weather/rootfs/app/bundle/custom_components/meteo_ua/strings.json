@@ -3,7 +3,7 @@
         "step": {
             "user": {
                 "title": "Meteo UA Weather — Search",
-                "description": "Enter settlement name to search, or leave empty for top 20 cities.",
+                "description": "Enter settlement name to search, or leave empty for top 50 cities.",
                 "data": {
                     "phrase": "Filter"
                 }
