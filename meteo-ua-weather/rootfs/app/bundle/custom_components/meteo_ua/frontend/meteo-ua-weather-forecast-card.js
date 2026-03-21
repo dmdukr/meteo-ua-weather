@@ -584,7 +584,25 @@ let t,e;function i(t,e,i,a){var r,s=arguments.length,o=s<3?e:null===a?a=Object.g
       font-size: 11px;
     }
 
-    /* Condition icon slot inside grid must fit */
+    /* Clickable day indicator — gold border + tap icon */
+    .mg-cell.has-hourly {
+      box-shadow: inset 0 0 0 1.5px rgba(255, 193, 7, 0.6);
+      border-radius: 8px;
+    }
+
+    .mg-cell.has-hourly:hover {
+      box-shadow: inset 0 0 0 2px rgba(255, 193, 7, 0.85);
+    }
+
+    .mg-tap-icon {
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      width: 12px;
+      height: 12px;
+      opacity: 0.5;
+      pointer-events: none;
+    }
   `}get gridConfig(){let t=this.config?.monthly_grid;return{show:t?.show!==!1,columns:t?.columns??6,show_wind:t?.show_wind!==!1,compact:t?.compact??!1,show_chart:t?.show_chart!==!1}}render(){let t=this.gridConfig;if(!t.show)return te;let e=this.dailyForecast;if(!e||0===e.length)return te;let i=[];for(let a=0;a<e.length;a+=t.columns)i.push(e.slice(a,a+t.columns));return J`
       <div class="mg-container">
         ${i.map(e=>this.renderRow(e,t))}
@@ -597,11 +615,14 @@ let t,e;function i(t,e,i,a){var r,s=arguments.length,o=s<3?e:null===a?a=Object.g
         ${e.show_chart?this.renderWaveSVG(t,i):te}
         ${t.map(t=>this.renderCell(t,e))}
       </div>
-    `}renderCell(t,e){let i,a=new Date(t.datetime),r=o5[a.getDay()],s=`${a.getDate()} ${o3[a.getMonth()]}`,o=(i=new Date,a.getFullYear()===i.getFullYear()&&a.getMonth()===i.getMonth()&&a.getDate()===i.getDate()),n=e.compact,l=Math.round(t.temperature),h=null!=t.templow?Math.round(t.templow):null,c=this.hass?.states[this.config.entity];return J`
+    `}renderCell(t,e){let i,a=new Date(t.datetime),r=o5[a.getDay()],s=`${a.getDate()} ${o3[a.getMonth()]}`,o=(i=new Date,a.getFullYear()===i.getFullYear()&&a.getMonth()===i.getMonth()&&a.getDate()===i.getDate()),n=e.compact,l=Math.round(t.temperature),h=null!=t.templow?Math.round(t.templow):null,c=this.hass?.states[this.config.entity],d=a.toDateString(),u=this.hourlyForecast.some(t=>new Date(t.datetime).toDateString()===d),p=this.selectedDate&&new Date(this.selectedDate).toDateString()===d;return J`
       <div
-        class="mg-cell ${o?"is-today":""} ${n?"compact":""} ${this.selectedDate&&new Date(t.datetime).toDateString()===new Date(this.selectedDate).toDateString()?"selected":""}"
+        class="mg-cell ${o?"is-today":""} ${n?"compact":""} ${p?"selected":""} ${u?"has-hourly":""}"
         @click=${()=>this.onDayClick(t)}
       >
+        ${u?J`<svg class="mg-tap-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="currentColor" d="M10.5 8.5a2 2 0 1 1 4 0v2.25a.75.75 0 0 0 1.5 0V9a1.25 1.25 0 0 1 2.5 0v3.5a5.5 5.5 0 0 1-5.5 5.5H12a5.5 5.5 0 0 1-4.9-3l-1.85-3.7a1.25 1.25 0 0 1 1.82-1.6L9 11.62V8.5a1.25 1.25 0 0 1 1.5-1.23Z"/>
+        </svg>`:te}
         <div class="mg-date">
           <span class="mg-date-day">${r}</span> ${s}
         </div>
