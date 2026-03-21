@@ -36,9 +36,11 @@ On first start automatically installs the **Meteo UA Weather** integration and f
 ## Uninstallation
 
 1. Remove the integration: **Settings → Integrations → Meteo UA Weather → Delete**
-2. Remove the add-on: **Settings → Apps → Meteo UA Weather → Uninstall**
-
-The integration automatically cleans up the Lovelace card resource and JS file when the last config entry is removed.
+2. Remove the app: **Settings → Apps → Meteo UA Weather → Uninstall**
+3. Remove leftover files using **File editor** app (install from App Store if needed):
+   - Delete folder: `custom_components/meteo_ua/`
+   - Delete file: `www/meteo-ua-weather-forecast-card.js`
+4. Restart Home Assistant
 
 ## Card Configuration
 
@@ -155,10 +157,12 @@ Found a bug? Open an issue:
 
 ## Видалення
 
-1. Видали інтеграцію: **Налаштування → Інтеграції → Meteo UA Weather → Видалити**
-2. Видали app: **Налаштування → Apps → Meteo UA Weather → Видалити**
-
-Інтеграція автоматично видаляє ресурс карточки Lovelace та JS-файл при видаленні останнього запису.
+1. Видаліть інтеграцію: **Налаштування → Інтеграції → Meteo UA Weather → Видалити**
+2. Видаліть app: **Налаштування → Apps → Meteo UA Weather → Видалити**
+3. Видаліть залишкові файли за допомогою **File editor** app (встановіть з App Store якщо потрібно):
+   - Видаліть папку: `custom_components/meteo_ua/`
+   - Видаліть файл: `www/meteo-ua-weather-forecast-card.js`
+4. Перезавантажте Home Assistant
 
 ## Налаштування карточки
 
