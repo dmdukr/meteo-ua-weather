@@ -5,7 +5,7 @@
                 "title": "Meteo UA Weather — Search",
                 "description": "Enter settlement name to search, or leave empty for top 20 cities.",
                 "data": {
-                    "phrase": "Search (optional)"
+                    "phrase": "Filter"
                 }
             },
             "select": {
