@@ -126,7 +126,7 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required("city"): SelectSelector(
                     SelectSelectorConfig(
                         options=options,
-                        mode=SelectSelectorMode.DROPDOWN,
+                        mode=SelectSelectorMode.LIST,
                     )
                 ),
             }),
