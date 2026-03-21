@@ -129,6 +129,11 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             city = user_input.get("city")
+
+            if city == "_back":
+                self._cities = DEFAULT_CITIES
+                return await self.async_step_user()
+
             if city:
                 parts = city.split("/", 1)
                 if len(parts) == 2:
@@ -154,7 +159,10 @@ class MeteoUaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema({
                 vol.Required("city"): SelectSelector(
                     SelectSelectorConfig(
-                        options=_build_options(self._cities),
+                        options=[
+                            SelectOptionDict(value="_back", label="\U0001f50d Новий пошук..."),
+                            *_build_options(self._cities),
+                        ],
                         mode=SelectSelectorMode.DROPDOWN,
                     )
                 ),
