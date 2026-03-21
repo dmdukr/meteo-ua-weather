@@ -1,4 +1,32 @@
-## 0.4.5
+# Changelog
+
+## 1.0.0
+
+### Integration
+- Two-step config flow: filter → select with top-50 Ukrainian cities
+- "Новий пошук" option in dropdown to return to search
+- Night temperature parsing (temp_day / temp_night) from meteo.ua
+- native_templow in daily forecast
+- async_remove_entry: clean Lovelace resource + JS on uninstall
+- Cache clear notification on addon update
+
+### Weather Forecast Card
+- Deep refactoring: -53% animation provider, -27% chart component
+- Removed lodash-es, consola dependencies (native helpers)
+- Night backgrounds for all 15 weather conditions
+- Blurred edges on partlycloudy clouds
+- Monthly grid: golden border + tap icon for clickable days
+- Monthly grid: uniform 36x36 icon box, clipTall for tall conditions
+- Monthly grid: night temperature in small white font
+- Monthly grid: day temperature 15px bold
+- 305/305 tests, ESLint 0 errors, 0 vulnerabilities
+- Bundle: 384 KB
+
+## 0.5.1
+
+- Fix: ha_condition field for daily forecast icons
+- Fix: remove all test modes from weather entity
+
 ## 0.5.0
 
 - Removed forecast type selector (hourly/daily) from editor
@@ -8,94 +36,27 @@
 - Attribute entities moved to Current Weather section
 - Current temperature precision moved to Current Weather
 - Forecast temperature precision moved to Hourly Forecast
-- Advanced settings now only contains icons path
 
 ## 0.4.8
 
-- Removed forecast type selector (always hourly)
-- Weather effects translated: ���, ����, ���������, ����, ̳����, �����
+- Weather effects: rain, snow, clouds, fog, wind, lightning
+- Effects translated to Ukrainian
 
 ## 0.4.7
 
 - Fix: all editor helper texts translated to Ukrainian
-- No untranslated English strings remaining in editor
 
 ## 0.4.6
 
-- Card rebuilt from TypeScript source (troinine/ha-weather-forecast-card)
+- Card rebuilt from TypeScript source
 - Monthly forecast grid: 30-day icons, temperature wave, color-coded
 - Editor: Monthly forecast settings (columns, wind, chart, compact)
-- Editor: Hourly/Daily expandable groups with UK localization
 - All editor labels and helpers translated to Ukrainian
-
-
-- Restored full card with monthly grid, SVG temperature waves, dynamic icons
-- Hourly chart + daily 30-day grid shown simultaneously
-- wfc-monthly-grid component with color gradient temperature curves
 
 ## 0.4.4
 
-- Rebuilt card from custom base — hourly + daily grid shown simultaneously
-- Hourly: scrollable strip with icons, temp, wind
-- Daily: 30-day grid with colored icons (6 per row default)
-- Editor with collapsible groups and UK localization
-- DOM-based rendering (no innerHTML)
-
-## 0.4.3
-
-- Fixed empty expandable group labels (Погодинний/Поденний прогноз)
-- Fixed daily_columns slider position (default 6)
-
-## 0.4.2
-
-- Fixed encoding — Ukrainian text now displays correctly
-- Rebuilt card from clean source with proper UTF-8
-
-## 0.4.0
-
-- Removed "Weather to show" selector — current weather always shown
-- Added "Show hourly forecast" toggle in Hourly group
-- Added "Show daily forecast" toggle in Daily group
-- Moved forecast display mode (Simple/Chart) to Hourly group
-- Added "Days per row" slider (default 6) to Daily group
-- Full Ukrainian localization of all labels and helpers
-
-## 0.4.0
-
-- Card: forecast.mode (Простий/Графік) moved to hourly forecast group
-- Card: daily_columns — days per row with CSS grid auto-resize
-- Card: "Simple"/"Chart" translated to Ukrainian
-
-## 0.3.9
-
-- Card editor: reorganized — General → Поточна погода → Погодинний прогноз → Поденний прогноз
-- All helper texts translated to Ukrainian
-- Fixed "Extra прогноз атрибут" label
-
-## 0.3.8
-
-- Hourly forecast starts from current_hour - 1
-
-## 0.3.7
-
-- Card editor: Ukrainian localization for all labels
-- Card editor: forecast interactions moved into hourly forecast group as "Взаємодія іконок"
-- Card editor: clearer group labels
-
-## 0.3.6
-
-- Card editor: hourly forecast settings in collapsible group
-- Card editor: daily forecast settings in collapsible group
-- Card rebuilt from TypeScript source with renamed custom element
-
-# Changelog
-
-## 0.3.5
-
-- Rebuilt card from TypeScript source (v1.30.0)
-- Grouped editor sections: hourly forecast, daily forecast settings
-- Hourly + Daily forecast via HA standard weather API
-- Parser returns full hourly data from weatherDetailSlider
+- Hourly + daily grid shown simultaneously
+- Editor with collapsible groups and Ukrainian localization
 
 ## 0.3.0
 
