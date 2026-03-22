@@ -1,6 +1,7 @@
 """Meteo UA — weather + 30-day forecast from meteo.ua."""
 from __future__ import annotations
 
+import json
 import logging
 import shutil
 from pathlib import Path
@@ -18,7 +19,21 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS_LIST = [Platform.WEATHER]
 
 CARD_FILENAME = "meteo-ua-weather-forecast-card.js"
-CARD_URL = f"/local/{CARD_FILENAME}"
+
+
+def _get_version() -> str:
+    """Read version from manifest.json."""
+    manifest = Path(__file__).parent / "manifest.json"
+    try:
+        return json.loads(manifest.read_text(encoding="utf-8")).get("version", "0")
+    except Exception:
+        return "0"
+
+
+def _card_url(version: str | None = None) -> str:
+    """Build card URL with cache-busting query param."""
+    v = version or _get_version()
+    return f"/local/{CARD_FILENAME}?v={v}"
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -77,14 +92,17 @@ async def _register_card(hass: HomeAssistant) -> None:
     dst = www_dir / CARD_FILENAME
 
     try:
-        if not dst.exists() or src.stat().st_size != dst.stat().st_size:
+        # Always copy on version bump (file might differ even if same size)
+        needs_copy = not dst.exists() or src.read_bytes() != dst.read_bytes()
+        if needs_copy:
             await hass.async_add_executor_job(shutil.copy2, str(src), str(dst))
             _LOGGER.info("Copied %s to %s", CARD_FILENAME, dst)
     except Exception as exc:
         _LOGGER.error("Failed to copy card: %s", exc)
         return
 
-    # Register as Lovelace resource via lovelace ResourceStorageCollection
+    # Register / update Lovelace resource with cache-busting version
+    url = _card_url()
     try:
         from homeassistant.components.lovelace import DOMAIN as LOVELACE_DOMAIN
         from homeassistant.components.lovelace.resources import (
@@ -93,28 +111,31 @@ async def _register_card(hass: HomeAssistant) -> None:
 
         lovelace_data = hass.data.get(LOVELACE_DOMAIN)
         if lovelace_data is None:
-            _LOGGER.warning("Lovelace not loaded — add card resource manually: %s", CARD_URL)
+            _LOGGER.warning("Lovelace not loaded — add card resource manually: %s", url)
             return
 
         resources: ResourceStorageCollection | None = getattr(lovelace_data, "resources", None)
         if resources is None:
-            _LOGGER.warning("Lovelace resources not available — add manually: %s", CARD_URL)
+            _LOGGER.warning("Lovelace resources not available — add manually: %s", url)
             return
 
-        # Check if already registered
         existing = [
             r for r in resources.async_items()
             if CARD_FILENAME in r.get("url", "")
         ]
         if not existing:
-            await resources.async_create_item({"res_type": "module", "url": CARD_URL})
-            _LOGGER.info("Registered Lovelace resource: %s", CARD_URL)
+            await resources.async_create_item({"res_type": "module", "url": url})
+            _LOGGER.info("Registered Lovelace resource: %s", url)
+        elif existing[0].get("url") != url:
+            # Version changed — update URL for cache busting
+            await resources.async_update_item(existing[0]["id"], {"url": url})
+            _LOGGER.info("Updated Lovelace resource: %s", url)
         else:
-            _LOGGER.debug("Lovelace resource already registered")
+            _LOGGER.debug("Lovelace resource up to date")
     except ImportError:
-        _LOGGER.warning("Cannot import lovelace resources — add card manually: %s", CARD_URL)
+        _LOGGER.warning("Cannot import lovelace resources — add card manually: %s", url)
     except Exception as exc:
-        _LOGGER.warning("Could not auto-register card: %s — add manually: %s", exc, CARD_URL)
+        _LOGGER.warning("Could not auto-register card: %s — add manually: %s", exc, url)
 
     hass.data.setdefault(DOMAIN, {})["_card_registered"] = True
 
